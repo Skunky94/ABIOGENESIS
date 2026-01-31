@@ -182,6 +182,10 @@ services:
       - LETTA_URL=http://letta-server:8283
       - SLEEP_THRESHOLD=5
       - SLEEP_WEBHOOK_PORT=8284
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
     volumes:
       - ./src/sleep_webhook.py:/app/sleep_webhook.py:ro
       - ./src/memory:/app/memory:ro

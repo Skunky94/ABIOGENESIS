@@ -16,7 +16,8 @@ RUN pip install --no-cache-dir \
     python-dotenv \
     pydantic \
     qdrant-client \
-    numpy
+    numpy \
+    redis
 
 # Code is mounted via docker-compose volumes, not copied
 

@@ -178,6 +178,24 @@ class MemoryOrchestrator:
         self._on_store_callback: Optional[Callable] = None
         self._on_retrieve_callback: Optional[Callable] = None
     
+    @property
+    def working_memory(self):
+        """Public access to working memory component."""
+        self._ensure_initialized()
+        return self._working_memory
+    
+    @property
+    def memory_manager(self):
+        """Public access to memory manager (Qdrant LTM)."""
+        self._ensure_initialized()
+        return self._memory_manager
+    
+    @property
+    def retriever(self):
+        """Public access to memory retriever."""
+        self._ensure_initialized()
+        return self._retriever
+    
     def _ensure_initialized(self) -> bool:
         """Lazy initialization of components."""
         if self._initialized:

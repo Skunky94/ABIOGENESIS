@@ -2,7 +2,46 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.3.0
+**Version**: 0.3.1
+
+---
+
+## 2026-02-02 - Redis Working Memory Integration Complete
+
+### INFRA-003: Redis Integration for Working Memory
+**Descrizione**: Completata l'integrazione di Redis per la Working Memory, permettendo persistenza reale dei contenuti in memoria attiva.
+
+**Modifiche**:
+
+1. **Dockerfile.webhook**: Aggiunto pacchetto `redis` per connessione dal container
+2. **docker-compose.yml**: Aggiunte variabili ambiente `REDIS_HOST` e `REDIS_PORT` per sleep-webhook
+3. **working_memory.py**: Aggiunta proprietà `count` per accesso rapido al numero di items
+4. **memory_orchestrator.py**: Aggiunte proprietà pubbliche `working_memory`, `memory_manager`, `retriever`
+5. **requirements.txt**: Già presente `redis>=5.0.0`
+
+**Test Results**: 4/4 PASSED
+- ✓ Redis Connection: PING/SET/GET/DELETE
+- ✓ Working Memory with Redis: add, get, persistence, search, rehearsal, clear
+- ✓ Memory Orchestrator Integration: remember (WM/LTM), recall
+- ✓ Decay & Capacity: 7 items limit enforced
+
+**Files Creati**:
+- `scarlet/tests/test_redis_working_memory.py` - Test suite per Redis WM
+
+**Files Modificati**:
+- `scarlet/Dockerfile.webhook` - Aggiunto `redis` a pip install
+- `scarlet/docker-compose.yml` - Variabili REDIS_HOST, REDIS_PORT per webhook
+- `scarlet/src/memory/working_memory.py` - Proprietà `count`
+- `scarlet/src/memory/memory_orchestrator.py` - Proprietà pubbliche components
+
+**Ambiente Verificato**:
+- Container `abiogenesis-sleep-webhook`: healthy, connesso a Redis
+- Container `abiogenesis-redis`: healthy
+- Working Memory: persistenza Redis attiva
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #redis #working-memory #infrastructure #persistence
 
 ---
 

@@ -453,6 +453,14 @@ class WorkingMemory:
         
         return chunk
     
+    # === Properties ===
+    
+    @property
+    def count(self) -> int:
+        """Get number of items in working memory."""
+        self._cleanup_expired()
+        return len(self._local_cache)
+    
     # === Attention Management ===
     
     @property
