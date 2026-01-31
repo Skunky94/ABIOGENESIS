@@ -169,22 +169,103 @@ Quando assisti con ABIOGENESIS:
 
 ## Stato Attuale del Progetto
 
-**Fase**: Fondazione
-- Struttura documentazione iniziale creata
-- Regole operative definite
-- Architettura concettuale delineata
-- Stack tecnologico identificato
+**Versione**: 0.2.0
+**Fase**: Modulo 1 (Foundation) Completato
 
-**Prossimi Passi**:
-1. Valutazione strumenti per componente
-2. Prototipazione Cortex Cognitivo
-3. Definizione Memory System
-4. Implementazione Goal Management
+### Implementato
 
----
+#### Architettura Agente
+| Componente | Stato | Note |
+|------------|-------|------|
+| Primary Agent (Scarlet) | ✓ Attivo | `agent-c8f46fe6-9011-4d71-b267-10c7808ba02f` |
+| Custom Sleep-Time Agent | ✓ Implementato | Architettura dual-agent alternativa |
+| Memory Blocks (5) | ✓ Configurati | persona, human, goals, session_context, constraints |
+| Context Window | ✓ 200K | MiniMax-M2.1 support |
+| System Prompt | ✓ Italiano | `prompts/system.txt` |
 
-## Riferimenti
+#### Memory Blocks (Italiani)
+```
+1. persona      - Identità, carattere, valori di Scarlet
+2. human        - Informazioni sull'umano
+3. goals        - Obiettivi attuali e progressi
+4. session_context - Focus corrente e task attivo
+5. constraints  - Vincoli di sicurezza (read-only)
+```
 
+#### Sistema Sleep-Time Personalizzato
+**Problema**: Letta 0.16.4 ha bug con `enable_sleeptime=True` (HTTP 500)
+
+**Soluzione**: Architettura dual-agent custom
+```
+Scarlet (Primary) ←→ SleepTimeOrchestrator ←→ Scarlet-Sleep (Consolidation)
+     ↓                                              ↓
+  User Messages                            Memory Insights (JSON)
+     ↓                                              ↓
+  Memory Blocks ←──────────────────────────── Insights
+```
+
+**Componenti**:
+- `ScarletSleepAgent`: Agente secondario per analisi conversazioni
+- `SleepTimeOrchestrator`: Coordina ciclo sleep-time
+- Threshold: 5 messaggi (configurabile)
+- Output: JSON strutturato con persona_updates, human_updates, goals_insights
+
+#### Configurazione Attuale
+```python
+config = ScarletConfig(
+    name="Scarlet",
+    model="minimax/MiniMax-M2.1",
+    context_window_limit=200000,
+    sleep_enabled=True,
+    sleep_messages_threshold=5
+)
+agent.create(with_sleep_agent=True)
+```
+
+### API Principali
+
+```python
+# Creazione
+scarlet = ScarletAgent()
+scarlet.create(with_sleep_agent=True)
+
+# Chat
+response = scarlet.chat("Ciao")
+
+# Sleep-time status
+status = scarlet.sleep_status
+# {'message_count': 3, 'threshold': 5, 'last_consolidation': None, ...}
+
+# Trigger manuale consolidazione
+insights = scarlet.force_consolidation()
+```
+
+### File Chiave
+| File | Percorso | Scopo |
+|------|----------|-------|
+| Agent Core | `scarlet/src/scarlet_agent.py` | Wrapper Letta con sleep-time custom |
+| System Prompt | `scarlet/prompts/system.txt` | Prompt in italiano |
+| Test Sleep-Time | `scarlet/tests/test_sleep_time_custom.py` | Test suite sleep-time |
+| Test Embeddings | `scarlet/tests/test_embeddings.py` | Test embedding BGE-m3 |
+
+### Stack Tecnologico Attuale
+| Componente | Versione | Note |
+|------------|----------|------|
+| Letta | 0.16.4 | Agent framework (buggy sleep-time) |
+| MiniMax-M2.1 | Latest | LLM provider (200K context) |
+| BGE-m3 | Ollama | Embeddings locali |
+| PostgreSQL | Docker | Database primario |
+| Redis | Docker | Cache e sessioni |
+
+### Prossimi Passi
+1. ✓ Foundation completato
+2. Implementare Goal Management System
+3. Implementare Emotional Encoding
+4. Implementare Procedural Memory
+5. Implementare Self-Improvement Loop
+
+### Riferimenti
 - [PROJECT_RULES.md](PROJECT_RULES.md) - Regole operative
 - [CHANGELOG.md](CHANGELOG.md) - Cronologia modifiche
 - [docs/architecture/](docs/architecture/) - Decisioni architetturali
+- [docs/guides/procedures.md](docs/guides/procedures.md) - Procedure operative

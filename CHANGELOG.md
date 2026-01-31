@@ -93,6 +93,28 @@ Scarlet (Primary) ←→ SleepTimeOrchestrator ←→ Scarlet-Sleep (Consolidati
 
 **Tags**: #docs #rules #tests #organization
 
+### DOCS-008: Documentazione Completa Architettura
+**Descrizione**: Aggiornata TUTTA la documentazione per riflettere l'architettura attuale con sleep-time custom.
+
+**Files Aggiornati**:
+- `CONTEXT.md` - Stato attuale del progetto v0.2.0 completo
+- `.github/copilot-instructions.md` - Istruzioni IDE con sleep-time custom
+- `docs/architecture/adr-002-scarlet-setup.md` - Architettura setup con sleep-time custom
+
+**Files Creati**:
+- `docs/architecture/adr-003-custom-sleep-time.md` - ADR completo per sistema sleep-time custom
+
+**Contenuto Documentazione**:
+- Architettura dual-agent con diagramma
+- Configurazione attuale (ScarletConfig, SleepAgentConfig)
+- API principali (create, chat, force_consolidation, sleep_status)
+- Memory blocks italiani configurati
+- Agent ID attuale: `agent-c8f46fe6-9011-4d71-b267-10c7808ba02f`
+- Flusso operativo dettagliato
+- Monitoring e debug
+
+**Tags**: #docs #architecture #core #sleep-time
+
 ## 2026-01-31 - Project Organization & Procedures
 
 ### DOCS-006: Procedure Standard Documentate
