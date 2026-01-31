@@ -24,6 +24,15 @@ services:
       - LETTA_REDIS_HOST=redis
       # Ollama per embeddings (BGE-m3 su GPU)
       - OLLAMA_BASE_URL=http://ollama:11434
+      # ====================================================================
+      # SLEEP-TIME CONFIGURATION
+      # ====================================================================
+      # Disable native buggy sleep-time, use custom webhook instead
+      - LETTA_SLEEPTIME_ENABLED=false
+      # Webhook per step completion (custom sleep-time)
+      - STEP_COMPLETE_WEBHOOK=http://sleep-webhook:8284/webhooks/step-complete
+      # Optional: Authentication key for webhook (must match sleep-webhook)
+      - STEP_COMPLETE_KEY=${STEP_COMPLETE_KEY:-}
     volumes:
       - ./data:/app/data:rw
       - ./prompts:/app/prompts:ro
@@ -145,6 +154,49 @@ services:
     restart: unless-stopped
     networks:
       - abiogenesis-net
+
+  # ====================================================================
+  # SLEEP-WEBHOOK - Sleep-Time Consolidation Service
+  # ====================================================================
+  # Receives webhook calls from Letta after each step completion
+  # Triggers sleep agent consolidation after N messages (default: 5)
+  #
+  # Architecture:
+  # 1. Letta calls webhook after each step (STEP_COMPLETE_WEBHOOK)
+  # 2. This service counts messages per conversation
+  # 3. After threshold, triggers sleep agent consolidation
+  # 4. Sleep agent analyzes and stores memories to Qdrant
+  #
+  # Configuration:
+  # - LETTA_URL: Letta server URL
+  # - SLEEP_THRESHOLD: Messages before consolidation (default: 5)
+  # - STEP_COMPLETE_WEBHOOK: http://sleep-webhook:8284/webhooks/step-complete
+  sleep-webhook:
+    build:
+      context: .
+      dockerfile: Dockerfile.webhook
+    container_name: abiogenesis-sleep-webhook
+    ports:
+      - "8284:8284"
+    environment:
+      - LETTA_URL=http://letta-server:8283
+      - SLEEP_THRESHOLD=5
+      - SLEEP_WEBHOOK_PORT=8284
+    volumes:
+      - ./src/sleep_webhook.py:/app/sleep_webhook.py:ro
+      - ./src/memory:/app/memory:ro
+      - ./.env:/app/.env:ro
+    depends_on:
+      letta-server:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - abiogenesis-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8284/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 # Volumes solo per dati persistenti (non per codice)
 volumes:

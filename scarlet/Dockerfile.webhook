@@ -1,0 +1,31 @@
+# Sleep-Webhook Service Dockerfile
+# Receives step completion webhooks from Letta and triggers sleep consolidation
+# v2.1 - Now with Qdrant memory integration (code mounted at runtime)
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn[standard] \
+    httpx \
+    python-dotenv \
+    pydantic \
+    qdrant-client \
+    numpy
+
+# Code is mounted via docker-compose volumes, not copied
+
+ENV LETTA_URL=http://localhost:8283
+ENV SLEEP_THRESHOLD=5
+ENV SLEEP_WEBHOOK_PORT=8284
+ENV QDRANT_HOST=qdrant
+ENV QDRANT_PORT=6333
+
+EXPOSE 8284
+
+CMD ["python", "sleep_webhook.py"]

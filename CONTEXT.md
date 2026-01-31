@@ -3,7 +3,48 @@
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
 **Version**: 1.0.0
-**Updated**: 2026-01-31
+**Updated**: 2026-02-01
+
+---
+
+## Current Project State
+
+### Version: 0.2.0 - Memory Enhancement Phase (Step 4 COMPLETED)
+
+| Phase | Status | Progress |
+|-------|--------|----------|
+| Foundation (v0.2.0) | ✅ COMPLETE | Primary agent, custom sleep-time, 5 memory blocks |
+| Memory Enhancement | 🔄 IN PROGRESS | Steps 1-4 complete, Qdrant + Letta integration |
+| Tool System | ⏳ PENDING | Core tools for memory access |
+| Goal Management | ⏳ PENDING | Self-generated goals |
+| Emotional Encoding | ⏳ PENDING | Emotional states |
+| Procedural Memory | ⏳ PENDING | Skill tracking |
+| Self-Improvement | ⏳ PENDING | Performance metrics |
+| Meta-Cognition | ⏳ PENDING | Thought patterns |
+
+### Memory System Status
+
+**Qdrant Infrastructure**: ✅ COMPLETE (Step 1)
+- 4 collections: episodes (1024d), concepts (1024d), skills (1024d), emotions (512d)
+- INT8 quantization for RAM efficiency
+- ~35MB/year storage for years of conversations
+
+**Extended Memory Blocks**: ✅ COMPLETE (Step 2)
+- 9 total memory blocks in Letta (5 base + 4 extended)
+- Episodic, Semantic, Procedural, Emotional memory types
+- EmbeddingManager with BGE-m3 integration
+
+**ScarletAgent Integration**: ✅ COMPLETE (Step 3)
+- MemoryManager initialization during agent creation
+- API methods: store_episodic_memory, store_knowledge, store_skill
+- Retrieval methods: retrieve_memories, get_memory_stats
+
+**Sleep-Time Integration**: ✅ COMPLETE (Step 4)
+- Automatic memory storage during consolidation
+- Key events → episodic memory
+- Knowledge updates → semantic memory
+- Skill updates → procedural memory
+- Emotional patterns → emotional memory
 
 ---
 
@@ -177,8 +218,8 @@ Quando assisti con ABIOGENESIS:
 #### Architettura Agente
 | Componente | Stato | Note |
 |------------|-------|------|
-| Primary Agent (Scarlet) | ✓ Attivo | `agent-c8f46fe6-9011-4d71-b267-10c7808ba02f` |
-| Custom Sleep-Time Agent | ✓ Implementato | Architettura dual-agent alternativa |
+| Primary Agent (Scarlet) | ✓ Attivo | `agent-ac26cf86-3890-40a9-a70f-967f05115da9` |
+| Sleep-Time Agent (Scarlet-Sleep) | ✓ Attivo | `agent-3dd9a54f-dc55-4d7f-adc3-d5cbb1aca950` |
 | Memory Blocks (5) | ✓ Configurati | persona, human, goals, session_context, constraints |
 | Context Window | ✓ 200K | MiniMax-M2.1 support |
 | System Prompt | ✓ Italiano | `prompts/system.txt` |

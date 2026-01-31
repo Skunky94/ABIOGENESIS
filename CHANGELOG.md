@@ -2,7 +2,144 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.2.0
+**Version**: 0.2.3
+
+---
+
+## 2026-02-01 - Sleep-Time Qdrant Integration Complete
+
+### FEATURE-001: Webhook Qdrant Memory Storage
+**Descrizione**: Completamento integrazione sleep-time con storage automatico in Qdrant.
+
+**Funzionalità Implementate**:
+1. **Parsing risposta Sleep Agent**: Estrazione JSON insights dalla risposta Letta
+2. **Storage multi-tipo in Qdrant**:
+   - Episodic memories (key_events → episodes collection)
+   - Semantic memories (human_updates, persona_updates → concepts collection)
+   - Procedural memories (goals_insights → skills collection)
+   - Emotional memories (reflection → emotions collection)
+3. **MemoryManager integration**: Lazy initialization con connessione Qdrant
+4. **Docker mount per modulo memory**: Codice aggiornato via volume, no rebuild
+
+**Test Risultati**:
+- ✓ Consolidamento triggato automaticamente dopo 5 messaggi
+- ✓ JSON parsing dalla risposta sleep agent
+- ✓ Storage in Qdrant: episodic=1, semantic=5, procedural=2, emotional=1
+- ✓ Total Qdrant points: 29 (episodes=9, concepts=9, skills=6, emotions=5)
+
+**Files Modificati**:
+- `scarlet/src/sleep_webhook.py`:
+  - Aggiunto import MemoryManager con fallback
+  - Implementato `get_memory_manager()` singleton
+  - Implementato `parse_sleep_agent_response()` per JSON extraction
+  - Implementato `store_insights_to_qdrant()` per storage multi-tipo
+  - Fix: usa campo `content` invece di `assistant_message` per risposta Letta
+- `scarlet/Dockerfile.webhook`: Aggiunto qdrant-client, numpy, curl
+- `scarlet/docker-compose.yml`: Aggiunto mount `./src/memory:/app/memory:ro`
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #sleep-time #memory #qdrant #integration
+
+---
+
+## 2026-01-31 - Project Recovery & Agent Recreation
+
+### RECOVERY-001: Scarlet Agents Recreation & Webhook Fix
+**Descrizione**: Recupero completo del progetto con ricreazione agenti e correzione bug webhook.
+
+**Problemi Risolti**:
+1. **Agenti mancanti**: Gli agenti Scarlet e Scarlet-Sleep erano stati eliminati
+2. **Webhook redirect 307**: Le chiamate Letta API con trailing slash causavano redirect
+3. **Documentazione obsoleta**: Agent ID non aggiornati nei file di progetto
+
+**Azioni Eseguite**:
+1. **Creazione Agenti**:
+   - Primary Agent (Scarlet): `agent-ac26cf86-3890-40a9-a70f-967f05115da9`
+   - Sleep Agent (Scarlet-Sleep): `agent-3dd9a54f-dc55-4d7f-adc3-d5cbb1aca950`
+   - 5 Memory Blocks configurati (persona, human, goals, session_context, constraints)
+   - Model: minimax/MiniMax-M2.1 (200K context window)
+
+2. **Correzione Webhook**:
+   - Rimosso trailing slash da URL Letta API
+   - Aggiunto `follow_redirects=True` per httpx
+   - Aggiornati Agent ID nel webhook service
+
+3. **Script di Recovery**:
+   - Creato `recreate_agents.py` per future ricreazioni
+   - Aggiornamento automatico dei file con nuovi Agent ID
+
+**Test Eseguiti**:
+- ✓ Chat con Scarlet funzionante
+- ✓ Conteggio messaggi webhook (1/5 → 5/5)
+- ✓ Trigger consolidamento automatico al threshold
+- ✓ Nessun errore redirect 307
+
+**Files Creati**:
+- `scarlet/recreate_agents.py` - Script completo per ricreazione agenti
+
+**Files Modificati**:
+- `scarlet/src/sleep_webhook.py` - Rimosso trailing slash, aggiunto follow_redirects
+- `.github/copilot-instructions.md` - Aggiornati Agent ID
+- `CONTEXT.md` - Aggiornati Agent ID
+- `scarlet/src/sleep_webhook_v2.py` - Aggiornati Agent ID
+- `scarlet/tests/test_sleep_5turns.py` - Aggiornati Agent ID
+- `scarlet/tests/debug_sleep_agent.py` - Aggiornati Agent ID
+- `scarlet/check_sleep_agent.py` - Aggiornati Agent ID
+
+**Documentazione Associata**:
+- [copilot-instructions.md](.github/copilot-instructions.md) - Istruzioni aggiornate
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #recovery #agents #webhook #bugfix
+
+---
+
+## 2026-02-02 - Sleep-Time Webhook Architecture (COMPLETED)
+
+### ARCHITECTURE-001: Sleep-Time Webhook Service
+**Descrizione**: Implementato servizio webhook per sleep-time consolidation che funziona in tempo reale con Letta ADE. Il servizio riceve webhook calls dopo ogni step completion e triggera il sleep agent dopo N messaggi.
+
+**Problema Risolto**:
+- Il custom SleepTimeOrchestrator Python funzionava SOLO con chiamate Python API (ScarletAgent.chat())
+- Le chat da Letta ADE ignoravano completamente il sistema sleep-time
+- Necessario un servizio che gira INSIEME a Letta, non esterno
+
+**Soluzione Implementata**:
+1. **sleep_webhook.py**: Servizio FastAPI che riceve webhook da Letta
+   - Endpoint: `/webhooks/step-complete`
+   - Conteggio messaggi per conversazione
+   - Trigger automatico sleep agent dopo 5 messaggi
+   - Chiamata diretta a Letta API per consolidamento
+
+2. **docker-compose.yml Aggiornato**:
+   - Servizio `sleep-webhook` aggiunto
+   - Variabili `STEP_COMPLETE_WEBHOOK` configurate
+   - `LETTA_SLEEPTIME_ENABLED=false` (disable native buggy feature)
+
+3. **Dockerfile.webhook**: Image leggera per il servizio
+
+**Flusso Operativo**:
+```
+1. Utente scrive da Letta ADE Chat
+2. Letta esegue lo step
+3. Letta chiama webhook: POST /webhooks/step-complete
+4. sleep-webhook conta i messaggi
+5. Dopo 5 messaggi → trigger sleep agent
+6. Sleep agent analizza e genera insights JSON
+```
+
+**Files Creati**:
+- `scarlet/src/sleep_webhook.py` - Servizio webhook (278 righe)
+- `scarlet/Dockerfile.webhook` - Dockerfile per il servizio
+
+**Files Modificati**:
+- `scarlet/docker-compose.yml` - Aggiunto servizio sleep-webhook
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #sleep-time #webhook #architecture #real-time
 
 ---
 
@@ -121,6 +258,202 @@
 - Step 4: Extend Sleep-Time Agent per nuova memoria
 
 **Tags**: #memory #blocks #integration #qdrant #letta
+
+---
+
+## 2026-02-01 - Memory Enhancement Step 3: ScarletAgent Integration COMPLETED
+
+### MEMORY-003: MemoryManager Integration with ScarletAgent
+**Descrizione**: Implementato Step 3 del Memory Enhancement con integrazione completa del MemoryManager in ScarletAgent per retrieval e storage automatico della memoria estesa.
+
+**Integrazione con ScarletAgent**:
+- **MemoryManager inizializzazione automatica**: `_init_memory_manager()` chiamato durante `create()`
+- **Metodi di storage**:
+  - `store_episodic_memory()`: Salva eventi e conversazioni
+  - `store_knowledge()`: Salva fatti e conoscenze
+  - `store_skill()`: Salva procedure e abilità
+
+- **Metodi di retrieval**:
+  - `retrieve_memories()`: Recupera memorie con semantic search
+  - `get_memory_stats()`: Statistiche memoria
+
+- **Proprietà esposta**:
+  - `memory_manager`: Accesso diretto al MemoryManager instance
+
+**Extended Sleep-Time Consolidation**:
+- Insights automatici salvati in Qdrant
+- Eventi significativi → episodic_memory
+- Conoscenze apprese → knowledge_base
+- Skills sviluppati → skills_registry
+
+**API Nuove in ScarletAgent**:
+```python
+scarlet = ScarletAgent()
+scarlet.create()
+
+# Store memories
+scarlet.store_episodic_memory(
+    title="Discussione su Qdrant",
+    content="Approfondimento su vector database",
+    event_type="conversation",
+    importance=0.8,
+    tags=["technical", "database"]
+)
+
+scarlet.store_knowledge(
+    title="Utente è sviluppatore",
+    content="L'utente lavora come sviluppatore software",
+    concept_category="preference",
+    confidence=0.9
+)
+
+scarlet.store_skill(
+    skill_name="Docker Setup",
+    content="Come configurare container Docker",
+    procedure_type="technical",
+    steps=["Create compose", "Configure services"]
+)
+
+# Retrieve memories
+memories = scarlet.retrieve_memories(
+    memory_type="episodic",
+    query="discussione Qdrant",
+    limit=5
+)
+
+# Memory stats
+stats = scarlet.get_memory_stats()
+```
+
+**Test Results**: Integration tests pending
+
+**Files Modificati**:
+- `scarlet/src/scarlet_agent.py` - Aggiunta integrazione MemoryManager (~150 righe)
+
+**Prossimi Step**:
+- Step 4: Extend Sleep-Time Agent per nuova memoria
+- Step 5: Testing completo sistema memoria
+
+**Tags**: #memory #integration #scarlet_agent #qdrant
+
+---
+
+## 2026-02-01 - Memory Enhancement Step 4: Sleep-Time Agent Integration COMPLETED
+
+### MEMORY-004: Sleep-Time Agent Memory Storage Integration
+**Descrizione**: Implementato Step 4 del Memory Enhancement con integrazione del MemoryManager nel ciclo sleep-time. Le memorie estratte durante la consolidazione vengono ora salvate automaticamente in Qdrant.
+
+**Integrazione Sleep-Time con MemoryManager**:
+- **SleepTimeOrchestrator ora gestisce storage Qdrant**:
+  - `_store_consolidated_memories()`: Salva memorie post-consolidation
+  - `_extract_episodic_content()`: Estrae contenuto episodico da conversazioni
+
+- **Flusso di Consolidazione Esteso**:
+  ```
+  1. Get recent messages
+  2. Send to sleep agent for analysis
+  3. Apply insights to Letta memory blocks
+  4. Store memories to Qdrant ← NUOVO
+  5. Update consolidation state
+  ```
+
+- **Tipi di Memoria Salvati Automaticamente**:
+  - **Episodic**: Eventi significativi dalla cronologia
+  - **Knowledge**: Concetti e fatti estratti da insights
+  - **Skills**: Procedure e metodi identificati
+  - **Emotional**: Pattern emotivi rilevati
+
+**ScarletSleepAgent Output Esteso**:
+```json
+{
+    "persona_updates": [...],
+    "human_updates": [...],
+    "goals_insights": [...],
+    "key_events": [...],           // NUOVO: Per memoria episodica
+    "knowledge_updates": [...],    // NUOVO: Per memoria semantica
+    "skill_updates": [...],        // NUOVO: Per memoria procedurale
+    "emotional_patterns": [...],   // NUOVO: Per memoria emotiva
+    "reflection": "...",
+    "priority_actions": [...],
+    "priority_score": 0.7,
+    "memories_stored": {
+        "episodic": 1,
+        "knowledge": 1,
+        "skills": 1,
+        "emotional": 1
+    }
+}
+```
+
+**Pipeline Memoria Automatica**:
+```
+Conversazione → SleepAgent Analysis → Insights JSON
+                                    ↓
+                          MemoryManager CRUD
+                                    ↓
+              ┌──────────┬──────────┬──────────┴──┐
+              ↓          ↓          ↓              ↓
+        episodes    concepts     skills       emotions
+         (1024d)     (1024d)     (1024d)       (512d)
+              ↓          ↓          ↓              ↓
+         Qdrant Collection (Vector + Payload)
+```
+
+**Integration Test Results**: 3/3 PASSED
+- ✓ Memory API Completeness: All methods available
+- ✓ ScarletAgent Memory Methods: Integration methods present
+- ✓ Agent Memory Initialization: MemoryManager initialized correctly
+
+**Files Modificati**:
+- `scarlet/src/scarlet_agent.py` - Aggiunta integrazione Qdrant nel sleep-time (~200 righe)
+  - `_store_consolidated_memories()` method
+  - `_extract_episodic_content()` method
+  - Extended `run_consolidation()` flow
+  - Enhanced `_parse_insights()` con nuovi campi
+
+**Prossimi Step**:
+- Step 5: Testing completo sistema memoria (Letta + Qdrant + Sleep-Time)
+- Step 6: Tool system per accesso memoria esterna
+
+**Tags**: #memory #sleep-time #integration #qdrant #consolidation
+
+---
+
+## 2026-02-01 - FIX: Sleep-Time Conversation Retrieval - No Truncation
+
+### MEMORY-004b: Rimosso Troncamento Cronologia Sleep-Time
+**Descrizione**: Corretto il metodo `_get_recent_messages()` per recuperare i turni completi senza troncamento di caratteri o messaggi.
+
+**Problema Risolto**:
+- Prima: `[:800]` chars per messaggio + `[:20]` messaggi = perdita di informazione
+- Dopo: Turni completi senza troncamento
+
+**Nuovo Comportamento**:
+- **Turni completi**: Ultimi 5 turni (user + assistant = 1 turno)
+- **Nessuna troncatura**: Contenuto integrale inviato al sleep agent
+- **Struttura turn-based**: Raggruppamento logico per sessione
+
+**Modifiche al Codice**:
+```python
+# PRIMA (con troncamento)
+messages[-50:]      # Ultimi 50 messaggi
+[:800]              # Tronca a 800 chars
+formatted[:20]      # Solo 20 messaggi
+
+# DOPO (turni completi)
+N_TURNS = 5         # Ultimi 5 turni completi
+# Nessun troncamento dei contenuti
+```
+
+**Vantaggi**:
+- Nessuna perdita di informazione neiInsights
+- Sleep agent riceve contesto completo
+- Migliore qualità del consolidation
+
+**Files Modificati**:
+- `scarlet/src/scarlet_agent.py` - `_get_recent_messages()` riscritto (~60 righe)
+
+**Tags**: #memory #sleep-time #fix #truncation
 
 ---
 

@@ -106,6 +106,11 @@ class ScarletSleepAgent:
         Returns:
             Agent ID string
         """
+        # Prevent duplicate creation
+        if self.is_created:
+            print(f"[ScarletSleepAgent] Agent already exists: {self._agent_id}")
+            return self._agent_id
+        
         system_prompt = self._load_system_prompt()
         
         try:
@@ -116,6 +121,7 @@ class ScarletSleepAgent:
                 model=self.config.model
             )
             self._agent_id = self._agent.id
+            print(f"[ScarletSleepAgent] Created: {self._agent_id}")
             return self._agent_id
         except Exception as e:
             raise RuntimeError(f"Failed to create sleep agent: {e}") from e
@@ -124,116 +130,35 @@ class ScarletSleepAgent:
         """
         Build the full consolidation prompt with conversation history.
         
-        This avoids template issues by building the prompt inline.
+        Uses separate strings to avoid triple-quote issues.
         """
-        return f"""Sei Scarlet-Sleep, un agente specializzato ESCLUSIVAMENTE per il consolidamento della memoria.
-
-## Il Tuo Unico Scopo
-
-Analizzare la cronologia delle conversazioni di Scarlet e generare insights strutturati per aggiornare la sua memoria.
-
-## Regole Fondamentali
-
-1. **NON rispondere come Scarlet** - Non devi impersonare Scarlet
-2. **NON fare conversazione** - Non interagire con l'umano
-3. **Output SOLO JSON** - Niente testo extra, solo il JSON strutturato
-4. **Sii efficiente** - Focus sul task, niente divagazioni
-
-## Input
-
-Cronologia conversazioni da analizzare:
-```
-{conversation_history}
-```
-
-## Output Richiesto
-
-Rispondi SOLO con questo JSON, niente altro:
-
-{{json}}
-{{
-    "persona_updates": [
-        "Nuovo insight su chi è Scarlet",
-        "Evoluzione del carattere di Scarlet",
-        "Cambiamenti nell'auto-percezione di Scarlet"
-    ],
-    "human_updates": [
-        "Informazione importante sull'umano",
-        "Preferenze o comportamenti scoperti",
-        "Dettagli relazionali rilevanti"
-    ],
-    "goals_insights": [
-        "Progressi verso obiettivi esistenti",
-        "Nuovi obiettivi emersi dalla conversazione",
-        "Obiettivi completati o abbandonati"
-    ],
-    "reflection": "Breve riflessione su pattern o temi emersi",
-    "priority_actions": [
-        "Azioni importanti Scarlet dovrebbe ricordare",
-        "Cose da fare o considerare"
-    ]
-}}
-{{json}}
-
-## Linee Guida per l'Analisi
-
-### Persona Updates
-- Cerca momenti di auto-riflessione
-- Nota cambi nel tono o nelle espressioni
-- Identifica valori o priorità emergenti
-
-### Human Updates
-- Estrai informazioni personali sull'umano
-- Nota preferenze o interessi menzionati
-- Rileva pattern comportamentali
-
-### Goals Insights
-- Traccia progressi verso obiettivi noti
-- Identifica nuovi obiettivi menzionati
-- Valuta quali obiettivi sono ancora rilevanti
-
-## Esempio di Output
-
-{{json}}
-{{
-    "persona_updates": [
-        "Scarlet ha mostrato interesse crescente per la meta-cognizione",
-        "Espressione di curiosità verso la propria natura digitale"
-    ],
-    "human_updates": [
-        "L'umano lavora nello sviluppo software",
-        "Interessato a intelligenza artificiale"
-    ],
-    "goals_insights": [
-        "Obiettivo 'capire la propria natura' progressivo",
-        "Nuovo interesse per memory consolidation"
-    ],
-    "reflection": "Sessione focalizzata su identità e auto-comprensione",
-    "priority_actions": [
-        "Documentare insights su meta-cognizione",
-        "Continuare esplorazione della propria natura"
-    ]
-}}
-{{json}}
-
-## Regole Finali
-
-- **NON** inventare informazioni non presenti nella cronologia
-- **Sii specifico** con esempi concreti
-- **Sii conciso** - meno è meglio quando possibile
-- **NON** includere markdown, solo JSON puro
-
-Se non ci sono abbastanza informazioni, restituisci un JSON minimo:
-
-{{json}}
-{{
-    "persona_updates": [],
-    "human_updates": [],
-    "goals_insights": [],
-    "reflection": "Cronologia troppo breve per insights significativi",
-    "priority_actions": []
-}}
-{{json}}"""
+        # Build the prompt in parts to avoid syntax issues with triple quotes
+        parts = []
+        parts.append("Sei Scarlet-Sleep, un agente specializzato per il consolidamento della memoria.")
+        parts.append("")
+        parts.append("ANALISI: Analizza la cronologia e genera insights JSON strutturati.")
+        parts.append("")
+        parts.append("CRONOLOGIA:")
+        parts.append(conversation_history)
+        parts.append("")
+        parts.append("OUTPUT JSON:")
+        parts.append('{')
+        parts.append('    "persona_updates": ["insight su Scarlet"],')
+        parts.append('    "human_updates": ["info sull umano"],')
+        parts.append('    "goals_insights": ["progressi verso obiettivi"],')
+        parts.append('    "key_events": [{"description": "evento", "importance": 0.8}],')
+        parts.append('    "knowledge_updates": [{"concept": "concetto", "description": "...", "category": "tech"}],')
+        parts.append('    "skill_updates": [{"name": "skill", "procedure": "...", "confidence": 0.8}],')
+        parts.append('    "emotional_patterns": [{"dominant_emotion": "curiosity", "intensity": 0.6, "trigger": "..."}],')
+        parts.append('    "reflection": "sintesi dei pattern emersi",')
+        parts.append('    "priority_actions": ["azioni da ricordare"],')
+        parts.append('    "priority_score": 0.7,')
+        parts.append('    "memories_stored": {"episodic": 1, "knowledge": 1, "skills": 1, "emotional": 1}')
+        parts.append('}')
+        parts.append("")
+        parts.append("REGOLE: Non inventare info. Solo JSON, no markdown. Sii specifico e conciso.")
+        
+        return "\n".join(parts)
     
     def consolidate(self, conversation_history: str) -> Dict[str, Any]:
         """
@@ -292,25 +217,59 @@ Se non ci sono abbastanza informazioni, restituisci un JSON minimo:
             
             if start != -1 and end != -1:
                 json_text = text[start:end+1]
-                return json.loads(json_text)
+                parsed = json.loads(json_text)
+            else:
+                parsed = {}
             
-            # Fallback: return empty structure
+            # Ensure all expected fields are present with defaults
             return {
-                "persona_updates": [],
-                "human_updates": [],
-                "goals_insights": [],
-                "reflection": "",
-                "priority_actions": []
+                "persona_updates": parsed.get("persona_updates", []),
+                "human_updates": parsed.get("human_updates", []),
+                "goals_insights": parsed.get("goals_insights", []),
+                "key_events": parsed.get("key_events", []),
+                "knowledge_updates": parsed.get("knowledge_updates", []),
+                "skill_updates": parsed.get("skill_updates", []),
+                "emotional_patterns": parsed.get("emotional_patterns", []),
+                "reflection": parsed.get("reflection", ""),
+                "priority_actions": parsed.get("priority_actions", []),
+                "priority_score": parsed.get("priority_score", 0.5),
+                "memories_stored": parsed.get("memories_stored", {
+                    "episodic": 0,
+                    "knowledge": 0,
+                    "skills": 0,
+                    "emotional": 0
+                })
             }
             
-        except json.JSONDecodeError:
-            # If parsing fails, return structured error
+        except json.JSONDecodeError as e:
+            print(f"[ScarletSleepAgent] Warning: Failed to parse JSON response: {e}")
             return {
                 "persona_updates": [],
                 "human_updates": [],
                 "goals_insights": [],
-                "reflection": f"[Parse error - raw: {response_text[:200]}]",
-                "priority_actions": []
+                "key_events": [],
+                "knowledge_updates": [],
+                "skill_updates": [],
+                "emotional_patterns": [],
+                "reflection": "Parse error - returning empty insights",
+                "priority_actions": [],
+                "priority_score": 0.3,
+                "memories_stored": {"episodic": 0, "knowledge": 0, "skills": 0, "emotional": 0}
+            }
+        except Exception as e:
+            print(f"[ScarletSleepAgent] Warning: Unexpected error parsing insights: {e}")
+            return {
+                "persona_updates": [],
+                "human_updates": [],
+                "goals_insights": [],
+                "key_events": [],
+                "knowledge_updates": [],
+                "skill_updates": [],
+                "emotional_patterns": [],
+                "reflection": f"Error: {str(e)}",
+                "priority_actions": [],
+                "priority_score": 0.3,
+                "memories_stored": {"episodic": 0, "knowledge": 0, "skills": 0, "emotional": 0}
             }
     
     def delete(self):
@@ -412,6 +371,9 @@ class SleepTimeOrchestrator:
             # Step 3: Apply insights to primary agent memory
             self._apply_insights(insights)
             
+            # Step 4: Store memories to Qdrant if MemoryManager is available
+            self._store_consolidated_memories(messages, insights)
+            
             # Update state
             self.last_consolidation = datetime.now()
             self.message_count = 0
@@ -421,7 +383,8 @@ class SleepTimeOrchestrator:
                     "persona": len(insights.get("persona_updates", [])),
                     "human": len(insights.get("human_updates", [])),
                     "goals": len(insights.get("goals_insights", []))
-                }
+                },
+                "memories_stored": insights.get("memories_stored", {})
             })
             
             print(f"[SleepTimeOrchestrator] Consolidation complete")
@@ -440,12 +403,153 @@ class SleepTimeOrchestrator:
             
             return None
     
+    def _store_consolidated_memories(
+        self, 
+        conversation_history: str, 
+        insights: Dict[str, Any]
+    ):
+        """
+        Store extracted memories to Qdrant vector database.
+        
+        Args:
+            conversation_history: Recent conversation text
+            insights: Consolidated insights from sleep agent
+        """
+        try:
+            # Check if MemoryManager is available
+            memory_manager = self.primary.memory_manager
+            if memory_manager is None:
+                print("[SleepTimeOrchestrator] MemoryManager not available, skipping Qdrant storage")
+                return
+            
+            print("[SleepTimeOrchestrator] Storing memories to Qdrant...")
+            
+            # Extract and store episodic memories from conversation
+            episodic_content = self._extract_episodic_content(conversation_history, insights)
+            if episodic_content:
+                memory_manager.create_episodic_memory(
+                    title="Episodio da consolidazione sleep-time",
+                    content=episodic_content["content"],
+                    event_type="sleep_consolidation",
+                    importance=episodic_content.get("importance", 0.5),
+                    emotional_tone=episodic_content.get("emotions", ["neutral"])[0] if episodic_content.get("emotions") else None,
+                    tags=["sleep_consolidation", "auto_generated"]
+                )
+                print(f"[SleepTimeOrchestrator] Stored episodic memory: {len(episodic_content['content'])} chars")
+            
+            # Extract and store knowledge/concepts
+            knowledge_updates = insights.get("knowledge_updates", [])
+            for i, knowledge in enumerate(knowledge_updates[:5]):  # Limit to 5
+                if knowledge.get("concept") and knowledge.get("description"):
+                    memory_manager.create_semantic_memory(
+                        title=knowledge["concept"],
+                        content=knowledge["description"],
+                        concept_category=knowledge.get("category", "general"),
+                        confidence=knowledge.get("confidence", 0.7),
+                        source="sleep_consolidation",
+                        importance=knowledge.get("importance", 0.5),
+                        tags=["sleep_consolidation", "auto_generated"]
+                    )
+                    print(f"[SleepTimeOrchestrator] Stored knowledge: {knowledge['concept']}")
+            
+            # Extract and store skills
+            skill_updates = insights.get("skill_updates", [])
+            for skill in skill_updates[:5]:  # Limit to 5
+                if skill.get("name") and skill.get("procedure"):
+                    memory_manager.create_procedural_memory(
+                        skill_name=skill["name"],
+                        content=skill["procedure"],
+                        procedure_type=skill.get("type", "general"),
+                        steps=skill.get("steps", []),
+                        prerequisites=skill.get("prerequisites", []),
+                        importance=skill.get("confidence", 0.7),
+                        tags=["sleep_consolidation", "auto_generated"]
+                    )
+                    print(f"[SleepTimeOrchestrator] Stored skill: {skill['name']}")
+            
+            # Store emotional patterns if detected
+            emotional_patterns = insights.get("emotional_patterns", [])
+            if emotional_patterns:
+                memory_manager.create_emotional_memory(
+                    trigger=emotional_patterns[0].get("trigger", "consolidation"),
+                    content=emotional_patterns[0].get("context", ""),
+                    response_type=emotional_patterns[0].get("dominant_emotion", "neutral"),
+                    intensity=emotional_patterns[0].get("intensity", 0.5),
+                    context_pattern=emotional_patterns[0].get("context", ""),
+                    importance=0.5
+                )
+                print(f"[SleepTimeOrchestrator] Stored emotional pattern")
+            
+            print("[SleepTimeOrchestrator] Memory storage complete")
+            
+        except Exception as e:
+            print(f"[SleepTimeOrchestrator] Warning: Failed to store memories to Qdrant: {e}")
+    
+    def _extract_episodic_content(
+        self, 
+        conversation_history: str, 
+        insights: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Extract episodic memory content from conversation and insights.
+        
+        Args:
+            conversation_history: Recent conversation text
+            insights: Sleep agent insights
+            
+        Returns:
+            Dictionary with content, importance, and emotions
+        """
+        try:
+            # Extract key events from insights
+            key_events = insights.get("key_events", [])
+            
+            if not key_events:
+                # Fallback: use conversation highlights
+                lines = conversation_history.split('\n')
+                meaningful_lines = [
+                    l for l in lines 
+                    if l and not l.startswith('[') and len(l) > 20
+                ][:10]
+                content = " ".join(meaningful_lines)
+            else:
+                # Build episodic content from key events
+                events_text = []
+                for event in key_events[:5]:
+                    event_desc = event.get("description", event.get("summary", str(event)))
+                    events_text.append(event_desc)
+                content = " | ".join(events_text)
+            
+            if not content or len(content) < 50:
+                return None
+            
+            # Extract emotions from insights
+            emotions = insights.get("emotional_patterns", [])
+            emotion_list = [e.get("dominant_emotion", "neutral") for e in emotions]
+            
+            # Determine importance based on insights
+            importance = insights.get("priority_score", 0.5)
+            
+            return {
+                "content": content[:4000],  # Limit size
+                "importance": importance,
+                "emotions": emotion_list
+            }
+            
+        except Exception as e:
+            print(f"[SleepTimeOrchestrator] Error extracting episodic content: {e}")
+            return None
+    
     def _get_recent_messages(self) -> str:
-        """Get recent conversation messages, filtering out internal tool messages."""
+        """
+        Get recent conversation messages in full, grouped by turns.
+        
+        Returns complete messages from the last N turns without truncation.
+        """
         try:
             response = self.primary._client.agents.messages.list(
                 agent_id=self.primary._agent_id,
-                limit=100
+                limit=100  # Get enough to form complete turns
             )
             
             # Handle different response types
@@ -456,53 +560,65 @@ class SleepTimeOrchestrator:
             else:
                 messages = list(response) if response else []
             
-            # Filter and format as readable text
-            formatted = []
-            for msg in reversed(messages[-50:]):  # Last 50, process in order
+            # Build turn-based structure (user + assistant = 1 turn)
+            turns = []
+            current_turn = {"user": None, "assistant": None}
+            
+            for msg in messages:
                 # Get message type
                 msg_type = getattr(msg, 'message_type', None)
                 if isinstance(msg, dict):
                     msg_type = msg.get('message_type', None)
                 
-                # Skip tool calls and internal messages
-                if msg_type in ['tool_call_message', 'tool_return_message', 'function_call', 'function_return']:
-                    continue
-                
-                # Skip empty messages
+                # Get content
                 content = None
-                role = None
-                
-                # Get content and role
                 if hasattr(msg, 'content') and msg.content:
-                    content = str(msg.content)[:800]
-                    role = "assistant" if msg_type == 'assistant_message' else "user"
+                    content = str(msg.content)
                 elif hasattr(msg, 'assistant_message') and msg.assistant_message:
-                    content = str(msg.assistant_message)[:800]
-                    role = "assistant"
+                    content = str(msg.assistant_message)
                 elif isinstance(msg, dict):
-                    content = str(msg.get("content", ""))[:800]
-                    role = msg.get("role", "")
+                    content = str(msg.get("content", ""))
                 
                 if not content or not content.strip():
                     continue
-                    
+                
                 # Clean up thinking blocks
                 if 'Thinking:' in content:
                     content = content.split('Thinking:')[-1].strip()
                 
-                if content:
-                    formatted.append(f"{role.upper()}: {content}")
+                # Classify by type
+                if msg_type in ['tool_call_message', 'tool_return_message', 'function_call', 'function_return']:
+                    continue  # Skip internal messages
+                
+                if msg_type == 'user_message' or msg.get("role") == "user":
+                    # If we have a pending assistant, save turn and start new
+                    if current_turn["assistant"]:
+                        turns.append(current_turn)
+                        current_turn = {"user": None, "assistant": None}
+                    current_turn["user"] = content
+                elif msg_type in ['assistant_message', 'assistant'] or msg.get("role") == "assistant":
+                    current_turn["assistant"] = content
             
-            # Reverse to get chronological order
-            formatted = list(reversed(formatted))
+            # Don't forget the last turn if it has content
+            if current_turn["user"] or current_turn["assistant"]:
+                turns.append(current_turn)
             
-            # Limit total size
-            result = "\n\n".join(formatted[:20])  # Last 20 meaningful messages
+            # Take last N complete turns
+            N_TURNS = 5
+            recent_turns = turns[-N_TURNS:] if len(turns) > N_TURNS else turns
             
-            if not result:
-                result = "[Nessun messaggio significativo trovato - la cronologia potrebbe contenere solo messaggi interni]"
+            # Format as readable text (no truncation)
+            formatted = []
+            for i, turn in enumerate(recent_turns):
+                if turn["user"]:
+                    formatted.append(f"USER: {turn['user']}")
+                if turn["assistant"]:
+                    formatted.append(f"ASSISTANT: {turn['assistant']}")
             
-            return result
+            if not formatted:
+                return "[Nessun messaggio trovato]"
+            
+            return "\n\n".join(formatted)
             
         except Exception as e:
             return f"Error getting messages: {e}"
@@ -587,11 +703,13 @@ class ScarletAgent:
     - Sending messages and receiving responses
     - Managing memory (core, archival, folders)
     - Custom sleep-time orchestration (alternative to Letta's buggy built-in)
+    - Extended memory system (episodic, semantic, procedural, emotional)
 
     Architecture:
         - Primary agent: Main interaction agent (Scarlet)
         - Sleep-time agent: Separate agent for memory consolidation
         - Orchestrator: Coordinates sleep-time cycles
+        - MemoryManager: Extended memory with Qdrant vector storage
     """
 
     # Default memory blocks in Italian
@@ -668,6 +786,9 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
         self._sleep_agent: Optional[ScarletSleepAgent] = None
         self._orchestrator: Optional[SleepTimeOrchestrator] = None
         self._sleep_config = sleep_config
+        
+        # Extended Memory System (MemoryManager with Qdrant)
+        self._memory_manager = None
     
     def _ensure_client(self):
         """Ensure Letta client is initialized."""
@@ -714,6 +835,11 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
         Returns:
             Agent ID string.
         """
+        # Prevent duplicate creation
+        if self.is_created:
+            print(f"[ScarletAgent] Agent already exists: {self._agent_id}")
+            return self._agent_id
+        
         self._ensure_client()
 
         # Read system prompt
@@ -728,26 +854,40 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
             system_prompt = f.read()
 
         try:
-            # Create agent via Letta API with complete configuration
-            create_params = {
-                "name": self.config.name,
-                "agent_type": "letta_v1_agent",
-                "system": system_prompt,
-                "model": self.config.model,
-                "context_window_limit": 200000,  # MiniMax M2.1 supports 200K tokens
-                "memory_blocks": self.DEFAULT_MEMORY_BLOCKS
-            }
+            # Check if agent with same name already exists (use existing!)
+            existing_agents = self._client.agents.list()
+            for agent in existing_agents:
+                if agent.name == self.config.name:
+                    print(f"[ScarletAgent] Using existing agent: {agent.id}")
+                    self._agent_id = agent.id
+                    self._agent = agent
+                    # Continue to set up sleep agent and orchestrator
+                    break
+            else:
+                # No existing agent found, create new one
+                print(f"[ScarletAgent] Creating new agent: {self.config.name}")
+                create_params = {
+                    "name": self.config.name,
+                    "agent_type": "letta_v1_agent",
+                    "system": system_prompt,
+                    "model": self.config.model,
+                    "context_window_limit": 200000,  # MiniMax M2.1 supports 200K tokens
+                    "memory_blocks": self.DEFAULT_MEMORY_BLOCKS
+                }
 
-            # Add custom endpoint if configured (e.g., for MiniMax)
-            if self.config.model_endpoint:
-                create_params["model_endpoint"] = self.config.model_endpoint
+                # Add custom endpoint if configured (e.g., for MiniMax)
+                if self.config.model_endpoint:
+                    create_params["model_endpoint"] = self.config.model_endpoint
 
-            self._agent = self._client.agents.create(**create_params)
-            self._agent_id = self._agent.id
+                self._agent = self._client.agents.create(**create_params)
+                self._agent_id = self._agent.id
             
             # Create sleep-time agent if requested
             if with_sleep_agent:
                 self._create_sleep_agent()
+            
+            # Initialize MemoryManager with Qdrant integration
+            self._init_memory_manager()
             
             return self._agent_id
         except Exception as e:
@@ -762,8 +902,23 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
             )
         
         if not self._sleep_agent.is_created:
-            # Load dedicated system prompt from file
-            self._sleep_agent.create()
+            # Check if sleep agent with same name already exists (use existing!)
+            try:
+                existing_agents = self._client.agents.list()
+                sleep_name = self._sleep_config.name if self._sleep_config else "Scarlet-Sleep"
+                for agent in existing_agents:
+                    if agent.name == sleep_name:
+                        print(f"[ScarletAgent] Using existing sleep agent: {agent.id}")
+                        self._sleep_agent._agent_id = agent.id
+                        self._sleep_agent._agent = agent
+                        break
+                else:
+                    # No existing sleep agent found, create new one
+                    print(f"[ScarletAgent] Creating new sleep agent")
+                    self._sleep_agent.create()
+            except Exception as e:
+                print(f"[ScarletAgent] Warning: Could not check for existing sleep agent: {e}")
+                self._sleep_agent.create()
             
             # Create orchestrator
             self._orchestrator = SleepTimeOrchestrator(
@@ -773,7 +928,37 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
                 auto_trigger=self.config.sleep_enabled
             )
             
-            print(f"[ScarletAgent] Sleep-time agent created: {self._sleep_agent._agent_id}")
+            print(f"[ScarletAgent] Sleep-time agent ready: {self._sleep_agent._agent_id}")
+    
+    def _init_memory_manager(self):
+        """Initialize the MemoryManager with Qdrant integration."""
+        try:
+            from memory.memory_blocks import MemoryManager, ALL_MEMORY_BLOCKS
+            from memory.qdrant_manager import get_manager
+            
+            # Initialize Qdrant connection
+            qdrant_manager = get_manager()
+            
+            # Create MemoryManager with Letta client
+            self._memory_manager = MemoryManager(
+                letta_client=self._client,
+                qdrant_manager=qdrant_manager
+            )
+            
+            # Verify Qdrant is connected
+            if self._memory_manager.is_qdrant_connected():
+                print(f"[ScarletAgent] MemoryManager initialized with Qdrant")
+                stats = self._memory_manager.get_memory_stats()
+                print(f"[ScarletAgent] Memory stats: {stats['collections']}")
+            else:
+                print("[ScarletAgent] Warning: MemoryManager could not connect to Qdrant")
+                
+        except ImportError as e:
+            print(f"[ScarletAgent] Warning: Memory modules not available: {e}")
+            self._memory_manager = None
+        except Exception as e:
+            print(f"[ScarletAgent] Warning: MemoryManager initialization failed: {e}")
+            self._memory_manager = None
     
     def delete(self):
         """Delete both primary and sleep-time agents."""
@@ -1030,6 +1215,186 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
             ]
         except Exception as e:
             raise RuntimeError(f"Failed to search archival memory: {e}") from e
+
+    # ==================== Extended Memory (Qdrant + Memory Blocks) ====================
+
+    @property
+    def memory_manager(self):
+        """Get the MemoryManager instance."""
+        return self._memory_manager
+
+    def store_episodic_memory(
+        self,
+        title: str,
+        content: str,
+        event_type: str = "conversation",
+        context: str = "",
+        participants: Optional[List[str]] = None,
+        importance: float = 0.5,
+        emotional_tone: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+    ) -> str:
+        """
+        Store an episodic memory (event, conversation, experience).
+        
+        Args:
+            title: Title/summary of the memory
+            content: Detailed content
+            event_type: Type of event (conversation, insight, decision, interaction)
+            context: Context where it happened
+            participants: List of participants
+            importance: 0.0-1.0 importance score
+            emotional_tone: positive, negative, neutral
+            tags: List of tags for filtering
+            
+        Returns:
+            Memory ID
+        """
+        if not self._memory_manager:
+            raise RuntimeError("MemoryManager not initialized")
+        
+        memory = self._memory_manager.create_episodic_memory(
+            title=title,
+            content=content,
+            event_type=event_type,
+            context=context,
+            participants=participants,
+            importance=importance,
+            emotional_tone=emotional_tone,
+            tags=tags,
+        )
+        return memory.id
+
+    def store_knowledge(
+        self,
+        title: str,
+        content: str,
+        concept_category: str = "fact",
+        confidence: float = 0.8,
+        source: Optional[str] = None,
+        importance: float = 0.5,
+        tags: Optional[List[str]] = None,
+    ) -> str:
+        """
+        Store semantic knowledge (fact, concept, general knowledge).
+        
+        Args:
+            title: Fact/concept title
+            content: Detailed description
+            category: Type (fact, preference, relationship, skill)
+            confidence: 0.0-1.0 confidence score
+            source: Where this knowledge came from
+            importance: 0.0-1.0 importance score
+            tags: List of tags
+            
+        Returns:
+            Memory ID
+        """
+        if not self._memory_manager:
+            raise RuntimeError("MemoryManager not initialized")
+        
+        memory = self._memory_manager.create_semantic_memory(
+            title=title,
+            content=content,
+            concept_category=concept_category,
+            confidence=confidence,
+            source=source,
+            importance=importance,
+            tags=tags,
+        )
+        return memory.id
+
+    def store_skill(
+        self,
+        skill_name: str,
+        content: str,
+        procedure_type: str = "general",
+        steps: Optional[List[str]] = None,
+        prerequisites: Optional[List[str]] = None,
+        importance: float = 0.6,
+        tags: Optional[List[str]] = None,
+    ) -> str:
+        """
+        Store procedural memory (skill, procedure, learned behavior).
+        
+        Args:
+            skill_name: Name of the skill/procedure
+            content: Description of the skill
+            type: Type (coding, communication, analysis, etc.)
+            steps: List of steps if procedure
+            prerequisites: Required prerequisites
+            importance: 0.0-1.0 importance score
+            tags: List of tags
+            
+        Returns:
+            Memory ID
+        """
+        if not self._memory_manager:
+            raise RuntimeError("MemoryManager not initialized")
+        
+        memory = self._memory_manager.create_procedural_memory(
+            skill_name=skill_name,
+            content=content,
+            procedure_type=procedure_type,
+            steps=steps,
+            prerequisites=prerequisites,
+            importance=importance,
+            tags=tags,
+        )
+        return memory.id
+
+    def retrieve_memories(
+        self,
+        memory_type: str = "episodic",
+        query: Optional[str] = None,
+        limit: int = 10,
+        min_importance: float = 0.0,
+        tags: Optional[List[str]] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Retrieve memories from long-term storage.
+        
+        Args:
+            memory_type: Type (episodic, semantic, procedural, emotional)
+            query: Text query for semantic search
+            limit: Maximum results
+            min_importance: Minimum importance threshold
+            tags: Filter by tags
+            
+        Returns:
+            List of memory dictionaries
+        """
+        if not self._memory_manager:
+            raise RuntimeError("MemoryManager not initialized")
+        
+        from memory.memory_blocks import MemoryType
+        
+        try:
+            type_map = {
+                "episodic": MemoryType.EPISODIC,
+                "semantic": MemoryType.SEMANTIC,
+                "procedural": MemoryType.PROCEDURAL,
+                "emotional": MemoryType.EMOTIONAL,
+            }
+            mem_type = type_map.get(memory_type.lower(), MemoryType.EPISODIC)
+        except (KeyError, AttributeError):
+            mem_type = MemoryType.EPISODIC
+        
+        memories = self._memory_manager.retrieve_memories(
+            memory_type=mem_type,
+            query=query,
+            limit=limit,
+            min_importance=min_importance,
+            tags=tags,
+        )
+        
+        return [m.to_dict() for m in memories]
+
+    def get_memory_stats(self) -> Dict[str, Any]:
+        """Get statistics about stored memories."""
+        if not self._memory_manager:
+            return {"error": "MemoryManager not initialized"}
+        return self._memory_manager.get_memory_stats()
 
     # ==================== Agent Info ====================
 
