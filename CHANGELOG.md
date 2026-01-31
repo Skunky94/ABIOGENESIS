@@ -2,9 +2,96 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.1.3
+**Version**: 0.2.0
 
 ---
+
+## 2026-02-01 - Custom Sleep-Time Agent Implementation
+
+### FEATURE-005: Custom Sleep-Time Agent (Alternative to Letta Buggy Built-in)
+**Descrizione**: Implementato un sistema di sleep-time personalizzato come alternativa al buggy `enable_sleeptime=True` nativo di Letta (causava errore HTTP 500). Il nuovo sistema usa un'architettura dual-agent con orchestrazione manuale.
+
+**Nuovi Componenti**:
+- **ScarletSleepAgent**: Agente secondario specializzato per il consolidamento della memoria. Analizza la cronologia conversazioni e genera insights in formato JSON strutturato.
+- **SleepTimeOrchestrator**: Coordina il ciclo sleep-time, monitora il conteggio messaggi, e triggera la consolidazione quando viene raggiunta la soglia configurata.
+
+**Caratteristiche**:
+- Consolidazione automatica dopo N messaggi (default: 5)
+- Output strutturato JSON con persona_updates, human_updates, goals_insights, reflection
+- Applicazione automatica degli insights ai memory blocks dell'agente primario
+- Supporto per trigger manuale con `force_consolidation()`
+- Callback per monitoring esterno
+
+**Modifiche al Codice**:
+- `scarlet/src/scarlet_agent.py` - Aggiunte classi `ScarletSleepAgent` e `SleepTimeOrchestrator`
+- `ScarletConfig`: Nuovi parametri `sleep_messages_threshold` e `sleep_enabled`
+- `SleepAgentConfig`: Configurazione per agente sleep-time
+- ` ScarletAgent.create(with_sleep_agent=True)`: Crea automaticamente entrambi gli agenti
+- ` ScarletAgent.chat()`: Triggera controllo sleep-time dopo ogni messaggio
+- ` ScarletAgent.force_consolidation()`: Trigger manuale consolidazione
+
+**API Nuove**:
+```python
+scarlet = ScarletAgent()
+scarlet.create(with_sleep_agent=True)
+
+# Status sleep-time
+status = scarlet.sleep_status  # Dict con stato orchestrator
+
+# Trigger manuale
+insights = scarlet.force_consolidation()
+```
+
+**Files Modificati**:
+- `scarlet/src/scarlet_agent.py` - 1027 righe (aggiunte 400+ righe)
+- `scarlet/src/test_sleep_time_custom.py` - Test suite completa
+
+**Documentazione Associata**:
+- [scarlet_agent.py](scarlet/src/scarlet_agent.py) - Implementazione completa
+- [test_sleep_time_custom.py](scarlet/src/test_sleep_time_custom.py) - Test suite
+
+**Compatibilità**: Non-Breaking (nuova feature opzionale)
+
+**Tags**: #core #sleep-time #memory #architecture
+
+### ARCH-001: Dual-Agent Architecture
+**Descrizione**: Implementata architettura dual-agent per supportare il sistema sleep-time personalizzato.
+
+**Architettura**:
+```
+Scarlet (Primary) ←→ SleepTimeOrchestrator ←→ Scarlet-Sleep (Consolidation)
+     ↓                                              ↓
+  User Messages                            Memory Insights
+     ↓                                              ↓
+  Memory Blocks ←──────────────────────────── Insights
+```
+
+**Vantaggi**:
+- Controllo completo sul processo di consolidamento
+- Nessuna dipendenza dal buggy built-in di Letta
+- Output strutturato e prevedibile
+- Facile estensione e debug
+
+**Tags**: #architecture #core #sleep-time
+
+**Tags**: #architecture #core #sleep-time
+
+### DOCS-007: Regole Gestione Test
+**Descrizione**: Aggiornate PROJECT_RULES.md con regole per organizzazione dei test nella cartella standard `scarlet/tests/`.
+
+**Nuova Regola R12 - Gestione Test**:
+- Test sempre in `scarlet/tests/`
+- Naming: `test_*.py` o `*_test.py`
+- Pulizia: cancellare test temporanei dopo l'uso
+- Riutilizzare test esistenti invece di crearne di nuovi
+
+**File Organizzati**:
+- `scarlet/tests/test_sleep_time_custom.py` (spostato da `src/`)
+- `scarlet/tests/test_embeddings.py` (spostato da `src/`)
+
+**Compatibilità**: Non-Breaking (organizzazione)
+
+**Tags**: #docs #rules #tests #organization
 
 ## 2026-01-31 - Project Organization & Procedures
 

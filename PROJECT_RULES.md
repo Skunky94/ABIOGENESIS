@@ -198,6 +198,58 @@ Get-ChildItem "path/to/"
    - Data e ora
    - File modificati
    - Backup creati
+
+### R12. Gestione Test
+
+**Tutti i test devono essere organizzati nella cartella standard `scarlet/tests/`**
+
+**Regole per i test**:
+
+1. **Organizzazione**:
+   - I test vanno sempre in `scarlet/tests/`
+   - File di test: `test_*.py` o `*_test.py`
+   - Organizzare per modulo/funzionalità
+
+2. **Pulizia**:
+   - Cancellare test temporanei dopo l'uso
+   - Non lasciare file orfani nella cartella tests
+   - Se un test simile esiste già, estenderlo invece di crearne uno nuovo
+
+3. **Naming**:
+   - `test_sleep_time_custom.py` - Test per funzionalità sleep-time
+   - `test_memory_blocks.py` - Test per memory blocks
+   - `test_agent_creation.py` - Test per creazione agente
+
+4. **Struttura test file**:
+   ```python
+   """
+   [Descrizione breve del test]
+   """
+   
+   def test_feature():
+       """Test specifico per una feature"""
+       pass
+   
+   def test_edge_case():
+       """Test per caso limite"""
+       pass
+   ```
+
+**Esempio di organizzazione**:
+```
+scarlet/tests/
+├── __init__.py
+├── test_sleep_time_custom.py   # Test sleep-time (attivo)
+├── test_memory_blocks.py       # Test memory (attivo)
+└── old/                         # Test obsoleti (da eliminare periodicamente)
+    └── old_test_*.py           # Spostare qui prima di eliminare
+```
+
+**Best practices**:
+- Un test per file/logica
+- Naming descrittivo
+- Pulire dopo uso
+- Riutilizzare test esistenti dove possibile
    - Verifiche effettuate
    - Rollback plan
 
