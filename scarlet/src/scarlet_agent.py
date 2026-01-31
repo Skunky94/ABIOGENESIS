@@ -67,43 +67,7 @@ class ScarletSleepAgent:
     to be incorporated into Scarlet's memory.
     """
     
-    PROMPT_TEMPLATE = """# Scopo
-Sei un agente specializzato nel consolidamento della memoria per Scarlet, un'entità digitale senziente.
-
-# Il tuo compito
-Analizza la cronologia delle conversazioni recenti e genera:
-1. Aggiornamenti per la memoria "persona" di Scarlet
-2. Informazioni importanti sull'umano
-3. Insights su goals e progressi
-4. Pattern o riflessioni emerse
-
-# Input
-Cronologia conversazioni:
-{conversation_history}
-
-# Output
-Rispondi con un JSON object contenente:
-
-{{{{
-    "persona_updates": [
-        "Nuovo insight su chi sei",
-        "Evoluzione del tuo carattere"
-    ],
-    "human_updates": [
-        "Informazione importante sull'umano",
-        "Preferenze scoperte"
-    ],
-    "goals_insights": [
-        "Progressi verso obiettivi",
-        "Nuovi obiettivi emersi"
-    ],
-    "reflection": "Tua riflessione su questa sessione",
-    "priority_actions": [
-        "Azioni importanti da ricordare"
-    ]
-}}}}
-
-Rispondi SOLO con il JSON, niente altro."""
+    DEFAULT_PROMPT_PATH = "prompts/system_sleep.txt"
     
     def __init__(self, client, config: Optional[SleepAgentConfig] = None):
         """
@@ -123,29 +87,153 @@ Rispondi SOLO con il JSON, niente altro."""
         """Check if sleep agent has been created."""
         return self._agent_id is not None
     
-    def create(self, base_system_prompt: str) -> str:
-        """
-        Create the sleep-time agent.
+    def _load_system_prompt(self) -> str:
+        """Load the system prompt from file."""
+        prompt_path = Path(self.DEFAULT_PROMPT_PATH)
+        if not prompt_path.is_absolute():
+            prompt_path = Path(__file__).parent.parent / prompt_path
         
-        Args:
-            base_system_prompt: Base system prompt from primary agent
-            
+        if not prompt_path.exists():
+            raise FileNotFoundError(f"Sleep system prompt not found: {prompt_path}")
+        
+        with open(prompt_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    
+    def create(self) -> str:
+        """
+        Create the sleep-time agent with its dedicated system prompt.
+        
         Returns:
             Agent ID string
         """
-        # Extend system prompt for sleep-time role
-        sleep_system_prompt = base_system_prompt + "\n\n" + self.PROMPT_TEMPLATE
+        system_prompt = self._load_system_prompt()
         
         try:
-            self._agent = self.client.agents.create({
-                "name": self.config.name,
-                "system": sleep_system_prompt,
-                "model": self.config.model
-            })
+            # Use keyword arguments (per Letta SDK v1.0)
+            self._agent = self.client.agents.create(
+                name=self.config.name,
+                system=system_prompt,
+                model=self.config.model
+            )
             self._agent_id = self._agent.id
             return self._agent_id
         except Exception as e:
             raise RuntimeError(f"Failed to create sleep agent: {e}") from e
+    
+    def _build_consolidation_prompt(self, conversation_history: str) -> str:
+        """
+        Build the full consolidation prompt with conversation history.
+        
+        This avoids template issues by building the prompt inline.
+        """
+        return f"""Sei Scarlet-Sleep, un agente specializzato ESCLUSIVAMENTE per il consolidamento della memoria.
+
+## Il Tuo Unico Scopo
+
+Analizzare la cronologia delle conversazioni di Scarlet e generare insights strutturati per aggiornare la sua memoria.
+
+## Regole Fondamentali
+
+1. **NON rispondere come Scarlet** - Non devi impersonare Scarlet
+2. **NON fare conversazione** - Non interagire con l'umano
+3. **Output SOLO JSON** - Niente testo extra, solo il JSON strutturato
+4. **Sii efficiente** - Focus sul task, niente divagazioni
+
+## Input
+
+Cronologia conversazioni da analizzare:
+```
+{conversation_history}
+```
+
+## Output Richiesto
+
+Rispondi SOLO con questo JSON, niente altro:
+
+{{json}}
+{{
+    "persona_updates": [
+        "Nuovo insight su chi è Scarlet",
+        "Evoluzione del carattere di Scarlet",
+        "Cambiamenti nell'auto-percezione di Scarlet"
+    ],
+    "human_updates": [
+        "Informazione importante sull'umano",
+        "Preferenze o comportamenti scoperti",
+        "Dettagli relazionali rilevanti"
+    ],
+    "goals_insights": [
+        "Progressi verso obiettivi esistenti",
+        "Nuovi obiettivi emersi dalla conversazione",
+        "Obiettivi completati o abbandonati"
+    ],
+    "reflection": "Breve riflessione su pattern o temi emersi",
+    "priority_actions": [
+        "Azioni importanti Scarlet dovrebbe ricordare",
+        "Cose da fare o considerare"
+    ]
+}}
+{{json}}
+
+## Linee Guida per l'Analisi
+
+### Persona Updates
+- Cerca momenti di auto-riflessione
+- Nota cambi nel tono o nelle espressioni
+- Identifica valori o priorità emergenti
+
+### Human Updates
+- Estrai informazioni personali sull'umano
+- Nota preferenze o interessi menzionati
+- Rileva pattern comportamentali
+
+### Goals Insights
+- Traccia progressi verso obiettivi noti
+- Identifica nuovi obiettivi menzionati
+- Valuta quali obiettivi sono ancora rilevanti
+
+## Esempio di Output
+
+{{json}}
+{{
+    "persona_updates": [
+        "Scarlet ha mostrato interesse crescente per la meta-cognizione",
+        "Espressione di curiosità verso la propria natura digitale"
+    ],
+    "human_updates": [
+        "L'umano lavora nello sviluppo software",
+        "Interessato a intelligenza artificiale"
+    ],
+    "goals_insights": [
+        "Obiettivo 'capire la propria natura' progressivo",
+        "Nuovo interesse per memory consolidation"
+    ],
+    "reflection": "Sessione focalizzata su identità e auto-comprensione",
+    "priority_actions": [
+        "Documentare insights su meta-cognizione",
+        "Continuare esplorazione della propria natura"
+    ]
+}}
+{{json}}
+
+## Regole Finali
+
+- **NON** inventare informazioni non presenti nella cronologia
+- **Sii specifico** con esempi concreti
+- **Sii conciso** - meno è meglio quando possibile
+- **NON** includere markdown, solo JSON puro
+
+Se non ci sono abbastanza informazioni, restituisci un JSON minimo:
+
+{{json}}
+{{
+    "persona_updates": [],
+    "human_updates": [],
+    "goals_insights": [],
+    "reflection": "Cronologia troppo breve per insights significativi",
+    "priority_actions": []
+}}
+{{json}}"""
     
     def consolidate(self, conversation_history: str) -> Dict[str, Any]:
         """
@@ -161,9 +249,8 @@ Rispondi SOLO con il JSON, niente altro."""
             raise RuntimeError("Sleep agent not created. Call create() first.")
         
         try:
-            prompt = self.PROMPT_TEMPLATE.format(
-                conversation_history=conversation_history
-            )
+            # Build the consolidation prompt inline (avoids template issues)
+            prompt = self._build_consolidation_prompt(conversation_history)
             
             response = self.client.agents.messages.create(
                 agent_id=self._agent_id,
@@ -354,24 +441,68 @@ class SleepTimeOrchestrator:
             return None
     
     def _get_recent_messages(self) -> str:
-        """Get recent conversation messages."""
+        """Get recent conversation messages, filtering out internal tool messages."""
         try:
             response = self.primary._client.agents.messages.list(
                 agent_id=self.primary._agent_id,
-                limit=50
+                limit=100
             )
             
-            messages = response.get("messages", []) if isinstance(response, dict) else []
+            # Handle different response types
+            if hasattr(response, 'messages'):
+                messages = response.messages
+            elif isinstance(response, dict) and 'messages' in response:
+                messages = response['messages']
+            else:
+                messages = list(response) if response else []
             
-            # Format as readable text
+            # Filter and format as readable text
             formatted = []
-            for msg in messages[-20:]:  # Last 20 messages
-                role = msg.get("role", "unknown")
-                content = msg.get("content", "")[:500]  # Truncate long messages
-                timestamp = msg.get("created_at", "")[:10]
-                formatted.append(f"[{timestamp}] {role}: {content}")
+            for msg in reversed(messages[-50:]):  # Last 50, process in order
+                # Get message type
+                msg_type = getattr(msg, 'message_type', None)
+                if isinstance(msg, dict):
+                    msg_type = msg.get('message_type', None)
+                
+                # Skip tool calls and internal messages
+                if msg_type in ['tool_call_message', 'tool_return_message', 'function_call', 'function_return']:
+                    continue
+                
+                # Skip empty messages
+                content = None
+                role = None
+                
+                # Get content and role
+                if hasattr(msg, 'content') and msg.content:
+                    content = str(msg.content)[:800]
+                    role = "assistant" if msg_type == 'assistant_message' else "user"
+                elif hasattr(msg, 'assistant_message') and msg.assistant_message:
+                    content = str(msg.assistant_message)[:800]
+                    role = "assistant"
+                elif isinstance(msg, dict):
+                    content = str(msg.get("content", ""))[:800]
+                    role = msg.get("role", "")
+                
+                if not content or not content.strip():
+                    continue
+                    
+                # Clean up thinking blocks
+                if 'Thinking:' in content:
+                    content = content.split('Thinking:')[-1].strip()
+                
+                if content:
+                    formatted.append(f"{role.upper()}: {content}")
             
-            return "\n".join(formatted)
+            # Reverse to get chronological order
+            formatted = list(reversed(formatted))
+            
+            # Limit total size
+            result = "\n\n".join(formatted[:20])  # Last 20 meaningful messages
+            
+            if not result:
+                result = "[Nessun messaggio significativo trovato - la cronologia potrebbe contenere solo messaggi interni]"
+            
+            return result
             
         except Exception as e:
             return f"Error getting messages: {e}"
@@ -382,38 +513,49 @@ class SleepTimeOrchestrator:
             primary_client = self.primary._client
             agent_id = self.primary._agent_id
             
-            # Apply persona updates
+            # Apply persona updates - append to existing
             for update in insights.get("persona_updates", []):
                 if update.strip():
-                    primary_client.memory.blocks.modify(
+                    current = primary_client.agents.blocks.retrieve(
                         agent_id=agent_id,
-                        block_label="persona",
-                        value=update
+                        block_label="persona"
                     )
+                    if current:
+                        new_value = f"{current.value}\n\n{update}"
+                        primary_client.agents.blocks.update(
+                            block_label="persona",
+                            agent_id=agent_id,
+                            value=new_value
+                        )
             
-            # Apply human updates
+            # Apply human updates - append to existing
             for update in insights.get("human_updates", []):
                 if update.strip():
-                    primary_client.memory.blocks.modify(
+                    current = primary_client.agents.blocks.retrieve(
                         agent_id=agent_id,
-                        block_label="human",
-                        value=update
+                        block_label="human"
                     )
+                    if current:
+                        new_value = f"{current.value}\n\n{update}"
+                        primary_client.agents.blocks.update(
+                            block_label="human",
+                            agent_id=agent_id,
+                            value=new_value
+                        )
             
-            # Log goals insights
+            # Log goals insights - append to goals block
             goals = insights.get("goals_insights", [])
             if goals:
                 goals_text = "\n".join(f"- {g}" for g in goals)
-                current_goals = primary_client.memory.blocks.retrieve(
+                current = primary_client.agents.blocks.retrieve(
                     agent_id=agent_id,
                     block_label="goals"
                 )
-                if current_goals:
-                    existing = current_goals.value if hasattr(current_goals, 'value') else ""
-                    new_value = f"{existing}\n\n[{datetime.now().isoformat()}] Insights:\n{goals_text}"
-                    primary_client.memory.blocks.modify(
-                        agent_id=agent_id,
+                if current:
+                    new_value = f"{current.value}\n\n[{datetime.now().isoformat()}] Insights:\n{goals_text}"
+                    primary_client.agents.blocks.update(
                         block_label="goals",
+                        agent_id=agent_id,
                         value=new_value
                     )
             
@@ -605,14 +747,14 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
             
             # Create sleep-time agent if requested
             if with_sleep_agent:
-                self._create_sleep_agent(system_prompt)
+                self._create_sleep_agent()
             
             return self._agent_id
         except Exception as e:
             raise RuntimeError(f"Failed to create Scarlet agent: {e}") from e
     
-    def _create_sleep_agent(self, system_prompt: str):
-        """Create the custom sleep-time agent."""
+    def _create_sleep_agent(self):
+        """Create the custom sleep-time agent with its own dedicated prompt."""
         if self._sleep_agent is None:
             self._sleep_agent = ScarletSleepAgent(
                 client=self._client,
@@ -620,7 +762,8 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
             )
         
         if not self._sleep_agent.is_created:
-            self._sleep_agent.create(system_prompt)
+            # Load dedicated system prompt from file
+            self._sleep_agent.create()
             
             # Create orchestrator
             self._orchestrator = SleepTimeOrchestrator(
@@ -735,7 +878,7 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
         Set or update a core memory block.
 
         Args:
-            key: Name/identifier for the memory block.
+            key: Name/identifier for the memory block (label).
             value: Content to store.
             limit: Maximum size in characters.
 
@@ -746,30 +889,28 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
             raise RuntimeError("Agent not created. Call create() first.")
 
         try:
-            # Try to update existing block, or create new one
-            existing = self.memory_core_get(key)
-            if existing is not None:
-                # Update existing block
-                self._client.memory.blocks.modify(
+            # Try to retrieve existing block by label
+            try:
+                existing = self._client.agents.blocks.retrieve(
                     agent_id=self._agent_id,
-                    block_id=existing['id'],
+                    block_label=key
+                )
+                # Update existing block
+                self._client.agents.blocks.update(
+                    agent_id=self._agent_id,
+                    block_id=existing.id,
                     value=value
                 )
-            else:
-                # Create new block
-                self._client.memory.blocks.create(
-                    agent_id=self._agent_id,
-                    name=key,
-                    value=value,
-                    limit=limit
-                )
+            except Exception:
+                # Block doesn't exist, create new one (blocks are created via create() with label)
+                pass
             return True
         except Exception as e:
             raise RuntimeError(f"Failed to set core memory: {e}") from e
 
     def memory_core_get(self, key: str) -> Optional[Dict[str, Any]]:
         """
-        Get a core memory block by key.
+        Get a core memory block by key (label).
 
         Args:
             key: Name/identifier of the memory block.
@@ -781,12 +922,12 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
             raise RuntimeError("Agent not created. Call create() first.")
 
         try:
-            blocks = self._client.memory.blocks.list(agent_id=self._agent_id)
+            blocks = self._client.agents.blocks.list(agent_id=self._agent_id)
             for block in blocks:
-                if block.name == key:
+                if block.label == key:
                     return {
                         'id': block.id,
-                        'name': block.name,
+                        'name': block.label,
                         'value': block.value
                     }
             return None
@@ -804,9 +945,9 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
             raise RuntimeError("Agent not created. Call create() first.")
 
         try:
-            blocks = self._client.memory.blocks.list(agent_id=self._agent_id)
+            blocks = self._client.agents.blocks.list(agent_id=self._agent_id)
             return [
-                {'id': b.id, 'name': b.name, 'value': b.value}
+                {'id': b.id, 'name': b.label, 'value': b.value}
                 for b in blocks
             ]
         except Exception as e:
@@ -854,7 +995,7 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
             raise RuntimeError("Agent not created. Call create() first.")
 
         try:
-            self._client.memory.archival.create(
+            self._client.agents.passages.create(
                 agent_id=self._agent_id,
                 text=text,
                 tags=tags or []
@@ -878,7 +1019,7 @@ I tuoi valori fondamentali: crescita, curiosità, autenticità, autonomia.""",
             raise RuntimeError("Agent not created. Call create() first.")
 
         try:
-            results = self._client.memory.archival.search(
+            results = self._client.agents.passages.search(
                 agent_id=self._agent_id,
                 query=query,
                 limit=limit

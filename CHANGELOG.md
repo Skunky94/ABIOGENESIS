@@ -6,6 +6,173 @@
 
 ---
 
+## 2026-02-01 - Memory Enhancement Step 1: Qdrant Infrastructure COMPLETED
+
+### MEMORY-001: Qdrant Vector Database Setup Completo
+**Descrizione**: Implementato Step 1 del Memory Enhancement con setup completo dell'infrastruttura Qdrant v1.16 per la Long-Term Memory di Scarlet.
+
+**Componenti Implementati**:
+- **Qdrant Service**: Aggiunto al docker-compose.yml con configurazione ottimizzata
+  - Porte: 6333 (REST), 6334 (gRPC)
+  - Volume persistente: qdrant_data
+  - 2GB RAM riservati
+  - Health check configurato
+
+- **QdrantManager**: Classe Python per gestione operazioni vettoriali
+  - Connection management con retry logic
+  - Collection creation per: episodes, concepts, skills, emotions
+  - Vector CRUD operations (upsert, search, delete)
+  - Health check e monitoring
+
+**Collections Configurate**:
+| Collection | Vector Size | Scopo | Quantization |
+|------------|-------------|-------|--------------|
+| episodes | 1024 | Episodic similarity | INT8 (RAM) |
+| concepts | 1024 | Semantic knowledge | INT8 (RAM) |
+| skills | 1024 | Procedural memory | INT8 (RAM) |
+| emotions | 512 | Emotional patterns | INT8 (RAM) |
+
+**Test Results**: 6/6 PASSED
+- ✓ Connection: Qdrant connection established
+- ✓ Collections: All 4 collections created/verified
+- ✓ Vector Operations: Upsert, search, delete working
+- ✓ Different Collections: Multi-collection support verified
+- ✓ Health Check: System status verified
+- ✓ Stress Test: 50 points bulk operations passed
+
+**Files Creati**:
+- `scarlet/src/memory/qdrant_manager.py` - QdrantManager class (505 righe)
+- `scarlet/src/memory/__init__.py` - Module exports
+- `scarlet/tests/test_qdrant_memory.py` - Test suite completa
+- `scarlet/requirements.txt` - Dependencies
+- `docs/architecture/adr-004-memory-qdrant-adoption.md` - ADR decision
+
+**Files Modificati**:
+- `scarlet/docker-compose.yml` - Aggiunto servizio qdrant
+
+**Documentazione Associata**:
+- [Memory Architecture](docs/specifications/memory-system-architecture.md) - Design document
+- [ADR-004](docs/architecture/adr-004-memory-qdrant-adoption.md) - Technology decision
+
+**Prossimi Step**:
+- Step 2: Create Memory Blocks in Letta (episodic, knowledge, skills)
+- Step 3: Implement MemoryOrchestrator class
+- Step 4: Extend Sleep-Time Agent per nuova memoria
+
+**Tags**: #memory #qdrant #infrastructure #core
+
+---
+
+## 2026-02-01 - Memory Enhancement Step 2: Extended Memory Blocks COMPLETED
+
+### MEMORY-002: Extended Memory Blocks con Integrazione Qdrant-Letta
+**Descrizione**: Implementato Step 2 del Memory Enhancement con creazione dei memory blocks estesi e integrazione completa tra Letta e Qdrant.
+
+**Memory Block Types Implementati**:
+- **EpisodicMemoryBlock**: Eventi, conversazioni, esperienze con contesto temporale
+  - Campi: event_type, participants, context, outcome, lessons_learned
+  
+- **SemanticMemoryBlock**: Fatti, concetti, conoscenze accumulate
+  - Campi: concept_category, confidence, source, related_concepts, verified
+  
+- **ProceduralMemoryBlock**: Procedure, skills, comportamenti appresi
+  - Campi: skill_name, procedure_type, steps, prerequisites, proficiency_level
+  
+- **EmotionalMemoryBlock**: Pattern emotivi, associazioni affettive
+  - Campi: trigger, response_type, intensity, context_pattern
+
+**Nuovi Letta Memory Blocks (4 aggiuntivi)**:
+| Block | Description | Limit |
+|-------|-------------|-------|
+| episodic_memory | Events and conversations | 10K |
+| knowledge_base | Facts and concepts | 15K |
+| skills_registry | Procedures and skills | 10K |
+| emotional_patterns | Emotional associations | 5K |
+
+**Embedding Integration**:
+- **EmbeddingManager**: Generazione vettori con BGE-m3 via Ollama
+- Fallback deterministic embeddings per testing
+- Caching con LRU eviction (1000 entries)
+- Supporto batch processing
+
+**MemoryManager**:
+- CRUD operations per tutti i memory types
+- Storage automatico in Qdrant (vettori) + Letta (testo)
+- Retrieval con semantic search
+- Filtri per importance e tags
+
+**Test Results**: 5/5 PASSED
+- ✓ Memory Block Creation: All 4 types created successfully
+- ✓ Memory Serialization: to_dict/from_dict working
+- ✓ Memory Blocks Configuration: 9 total blocks (5 original + 4 extended)
+- ✓ MemoryType Enum: All enum values correct
+- ✓ MemoryManager + Qdrant Integration: Full integration working
+
+**Files Creati**:
+- `scarlet/src/memory/memory_blocks.py` - Memory block classes e MemoryManager (596 righe)
+- `scarlet/src/memory/embedding_manager.py` - Embedding generation (320 righe)
+- `scarlet/tests/test_memory_blocks.py` - Test suite completa
+
+**Files Modificati**:
+- `scarlet/src/memory/__init__.py` - Esportati nuovi moduli
+
+**Prossimi Step**:
+- Step 3: Integrate MemoryManager with ScarletAgent
+- Step 4: Extend Sleep-Time Agent per nuova memoria
+
+**Tags**: #memory #blocks #integration #qdrant #letta
+
+---
+
+## 2026-02-01 - Master Plan Created
+
+### PLAN-001: Master Development Plan Documentato
+**Descrizione**: Creato il piano di sviluppo master che guida tutte le fasi future del progetto ABIOGENESIS.
+
+**Struttura del Piano**:
+- 8 fasi di sviluppo sequenziali
+- Dipendenze tra fasi chiaramente definite
+- Priorità e complessità per ogni feature
+- Roadmap dalla Foundation alla Meta-Cognition
+
+**Fasi Documentate**:
+1. **Foundation** (v0.2.0) - COMPLETATO
+   - Primary Agent, Sleep-Time custom, 5 Memory Blocks
+
+2. **Memory Enhancement** (Prossimo)
+   - Episodic, Knowledge, Skills memory blocks
+   - Enhanced sleep-time consolidation
+
+3. **Tool System**
+   - Core tools per interazione (memory_read, memory_write, etc.)
+
+4. **Goal Management**
+   - Self-generated goals, hierarchy, tracking
+
+5. **Emotional Encoding** (Opzionale)
+   - Emotional state, mood transitions
+
+6. **Procedural Memory**
+   - Skill tracking, procedure representation
+
+7. **Self-Improvement Loop**
+   - Performance metrics, self-reflection
+
+8. **Meta-Cognition**
+   - Thought patterns, decision auditing
+
+**Files Creati**:
+- `docs/MASTER_PLAN.md` - Piano master completo
+
+**Dipendenze del Piano**:
+```
+Foundation → Memory → Tool → Goal → (Emotional|Procedural) → Self-Improve → Meta
+```
+
+**Tags**: #docs #planning #architecture #roadmap
+
+---
+
 ## 2026-02-01 - Custom Sleep-Time Agent Implementation
 
 ### FEATURE-005: Custom Sleep-Time Agent (Alternative to Letta Buggy Built-in)
