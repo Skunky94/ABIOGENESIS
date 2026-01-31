@@ -102,6 +102,116 @@ Ogni operazione che cambi comportamento, struttura o configurazione DEVE:
 - **Minor**: Nuove feature significative
 - **Patch**: Bugfix, miglioramenti, aggiornamenti documentazione
 
+### R8. Gestione Prompt e File Critici
+
+**PRIMA di modificare qualsiasi prompt o file critico**:
+1. Creare backup nella stessa directory con suffisso `.bak` o `.backup.YYYYMMDD`
+2. Verificare che il backup sia stato creato correttamente
+3. Documentificata
+
+**Strutturaare la modifica pian backup per file critici**:
+```
+scarlet/prompts/
+├── system.txt              <- File corrente (sorgente di verità)
+├── system.txt.bak          <- Backup automatico prima di ogni modifica
+└── system.txt.20260131.bak <- Backup datato per versioni significative
+```
+
+**Comando standard per backup**:
+```bash
+# PowerShell
+Copy-Item "path/to/file.txt" "path/to/file.txt.bak"
+
+# Verifica
+Get-ChildItem "path/to/"
+```
+
+### R9. Organizzazione Workspace
+
+**Regola generale**: Mantenere il workspace pulito e organizzato
+
+**Procedure per modifiche a file esistenti**:
+1. Identificare il file sorgente di verità (unica fonte)
+2. Verificare se esiste già un backup recente
+3. Se non esiste, creare backup prima di modificare
+4. Modificare SOLO il file sorgente, non duplicati
+5. Aggiornare changelog e documentazione
+
+**File critici e loro posizioni**:
+| File | Posizione | Backup |
+|------|-----------|--------|
+| System Prompt | `scarlet/prompts/system.txt` | `.bak` |
+| Agent Code | `scarlet/src/scarlet_agent.py` | Git |
+| Config | `scarlet/.env` | `.env.example` |
+| Docker Compose | `scarlet/docker-compose.yml` | Git |
+
+### R10. Procedure Riutilizzabili
+
+**Tutte le procedure devono essere documentate e tracciate**
+
+**Template procedura**:
+```markdown
+## [Nome Procedura]
+
+**Scopo**: Breve descrizione
+**Quando usarla**: Condizioni di applicazione
+**Prerequisiti**: Cosa serve prima di iniziare
+
+**Passi**:
+1. [Azione]
+2. [Azione]
+3. [Azione]
+
+**Verifica**: Come controllare che sia andata a buon fine
+
+**Rollback**: Come tornare allo stato precedente
+```
+
+**Procedure standard del progetto**:
+
+#### P-001: Aggiornamento System Prompt
+1. Backup: `Copy-Item "prompts/system.txt" "prompts/system.txt.bak"`
+2. Modificare `prompts/system.txt`
+3. Testare con l'agente
+4. Aggiornare changelog
+
+#### P-002: Modifica Configurazione Agente
+1. Backup solo se richiesto (codice sorgente = Git)
+2. Modificare `scarlet/src/scarlet_agent.py`
+3. Riavviare container Docker se necessario
+4. Verificare funzionamento
+5. Aggiornare changelog
+
+#### P-003: Recreazione Agente Letta
+1. Eseguire script `scarlet/recreate_scarlet.py`
+2. Confermare eliminazione agente esistente
+3. Creare nuovo agente con `ScarletAgent().create()`
+4. Verificare parametri corretti (context window, embedding, sleep-time)
+
+### R11. Tracciabilità delle Modifiche
+
+**Ogni modifica deve essere tracciabile**:
+
+1. **Prima**: Documentare intenzione
+2. **Durante**: Backup di file critici
+3. **Dopo**: Aggiornare changelog con:
+   - Data e ora
+   - File modificati
+   - Backup creati
+   - Verifiche effettuate
+   - Rollback plan
+
+**Checklist pre-commit per file critici**:
+- [ ] Backup creato
+- [ ] Backup verificato
+- [ ] Documentazione aggiornata
+- [ ] Changelog compilato
+- [ ] Test/verifica effettuata
+
+---
+
+## Riferimenti Procedure
+
 ---
 
 ## Componenti Core di Scarlet

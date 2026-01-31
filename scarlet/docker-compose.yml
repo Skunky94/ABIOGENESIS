@@ -1,0 +1,124 @@
+# ABIOGENESIS - Scarlet Environment Setup
+# Modulo 1: Foundation con Letta
+#
+# RULES:
+# - Usa bind mounts per sviluppo (veloce, nessun build)
+# - Image gia' presente (letta/letta:patched) per evitare pull
+# - Solo postgres+redis necessari (Ollama esterno se serve)
+# - Build solo per produzione finale
+
+services:
+  letta-server:
+    # Immagine Letta originale
+    image: letta/letta:latest
+    container_name: abiogenesis-letta
+    ports:
+      - "8283:8283"
+    environment:
+      # MiniMax API key per provider nativo
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY}
+      # Usa PostgreSQL esterno invece del database interno
+      - LETTA_PG_HOST=postgres
+      - LETTA_PG_PASSWORD=${POSTGRES_PASSWORD:-scarlet_secure_password}
+      # Usa Redis esterno invece del cache interno
+      - LETTA_REDIS_HOST=redis
+      # Ollama per embeddings (BGE-m3 su GPU)
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - ./data:/app/data:rw
+      - ./prompts:/app/prompts:ro
+      - ./.env:/app/.env:ro
+      # Mount dei file fixati per MiniMax
+      - ./letta-source/letta/schemas/providers/minimax.py:/app/letta/schemas/providers/minimax.py:ro
+      - ./letta-source/letta/llm_api/openai_client.py:/app/letta/llm_api/openai_client.py:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - abiogenesis-net
+    # Logging configurato per sviluppo
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: abiogenesis-postgres
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-scarlet_secure_password}
+      - POSTGRES_DB=letta
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - abiogenesis-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: abiogenesis-redis
+    restart: unless-stopped
+    networks:
+      - abiogenesis-net
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: abiogenesis-ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_GPU_ENABLED=true
+      # Performance optimizations
+      - OLLAMA_KEEP_ALIVE=-1              # Keep model always loaded (no unload)
+      - OLLAMA_NUM_PARALLEL=4             # Allow 4 parallel requests
+      - OLLAMA_FLASH_ATTENTION=true       # Enable flash attention for faster inference
+      - OLLAMA_MAX_LOADED_MODELS=2        # Allow 2 models loaded simultaneously
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - abiogenesis-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+# Volumes solo per dati persistenti (non per codice)
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  ollama_data:
+    driver: local
+
+networks:
+  abiogenesis-net:
+    driver: bridge
+    name: abiogenesis-network

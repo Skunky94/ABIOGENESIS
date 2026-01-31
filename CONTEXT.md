@@ -81,6 +81,15 @@ Consapevolezza di sé:
 - **LLM Provider**: OpenAI (GPT-4), Anthropic (Claude), o equivalenti
 - **Compute**: Scalability per carichi variabili
 
+### Framework Agenti
+| Componente | Strumento | Note |
+|------------|-----------|------|
+| **Agent Framework** | **Letta** | Foundation per Scarlet (vedi ADR-001) |
+| Memory Persistence | Letta Core + Archival | Gerarchia 4 livelli |
+| Tool Execution | Letta Tools + Custom | Multi-step con heartbeat |
+| Multi-Agent | Letta Teams | Coordinamento avanzato |
+| RAG | Letta Embeddings | Knowledge retrieval |
+
 ---
 
 ## Struttura del Progetto

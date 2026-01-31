@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "WebFetch(domain:*)",
+      "WebFetch(domain:docs.letta.com)",
+      "WebFetch(domain:www.promptingguide.ai)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:docs.cleanrl.dev)",
+      "WebFetch(domain:arxiv.org)",
+      "WebFetch(domain:stable-baselines3.readthedocs.io)",
+      "WebFetch(domain:docs.ray.io)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "WebFetch(domain:python.langchain.com)",
+      "WebFetch(domain:soar.eecs.umich.edu)",
+      "WebFetch(domain:act-r.psy.cmu.edu)",
+      "WebFetch(domain:citeseerx.ist.psu.edu)",
+      "WebFetch(domain:docs.crewai.com)",
+      "WebFetch(domain:soar-architecture.github.io)",
+      "WebFetch(domain:planning.wiki)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebFetch(domain:code.claude.com)",
+      "Bash(docker ps:*)",
+      "Bash(docker rm:*)",
+      "Bash(docker network:*)",
+      "Read(//c/Users/Davide/AppData/Local/Programs/Python/Python313/Lib/site-packages/letta_client/resources/agents/**)"
+    ]
+  }
+}
