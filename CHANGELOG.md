@@ -2,7 +2,96 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.2.4
+**Version**: 0.3.0
+
+---
+
+## 2026-02-01 - Human-Like Memory Architecture Implementation
+
+### MEMORY-005: Human-Like Memory System Complete
+**Descrizione**: Implementato sistema di memoria completo simil-umano con retrieval automatico, working memory e orchestrazione centrale.
+
+**Nuovi Componenti**:
+
+#### 1. Memory Retriever (`memory_retriever.py`)
+Tool per permettere a Scarlet di consultare la propria memoria prima di rispondere.
+- `MemoryRetriever`: Classe per ricerca cross-collection in Qdrant
+- `RetrievalStrategy`: Enum con strategie (SEMANTIC, TEMPORAL, EMOTIONAL, IMPORTANCE, HYBRID)
+- `memory_search_tool()`: Funzione tool per integrazione Letta
+- `memory_context_tool()`: Genera contesto formattato per LLM
+- `MEMORY_SEARCH_TOOL`: Definizione tool JSON per Letta
+
+#### 2. Working Memory (`working_memory.py`)
+Memoria attiva a capacità limitata ispirata al modello di Baddeley & Hitch.
+- `WorkingMemory`: Classe principale con capacità 7±2 items (Miller's number)
+- `WorkingMemoryItem`: Item con decay temporale (5 minuti default)
+- `WorkingMemoryItemType`: FACT, TASK, CONTEXT, REFERENCE, CHUNK
+- Features: rehearsal, attention focus, chunking, task queue
+- Storage: Redis per persistenza, fallback in-memory
+
+#### 3. Memory Orchestrator (`memory_orchestrator.py`)
+Controller centrale che coordina tutti i layer di memoria.
+- `MemoryOrchestrator`: Coordina WM, LTM e Letta core memory
+- `ContentCategory`: Classificazione automatica (EVENT, FACT, PROCEDURE, EMOTION, TASK)
+- Auto-routing: contenuti low-importance → WM, high-importance → LTM
+- Auto-consolidation: WM → LTM quando threshold raggiunto
+- Convenience functions: `remember()`, `recall()`, `get_context()`
+
+**Architettura**:
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   USER INPUT                                │
+│                        │                                    │
+│                        ▼                                    │
+│              ┌─────────────────┐                           │
+│              │    Orchestrator │  ← Central Controller     │
+│              └────────┬────────┘                           │
+│     ┌─────────────────┼─────────────────┐                  │
+│     ▼                 ▼                 ▼                  │
+│  Working          Retriever          Core                  │
+│  Memory           (Qdrant)          (Letta)                │
+│  (Redis)             │               Blocks                │
+│     │        ┌───────┴───────┐                            │
+│     │        ▼       ▼       ▼                            │
+│     │    episodes concepts skills emotions                │
+│     │                                                      │
+│     └──────────────────┬──────────────────────────────────┘
+│                        ▼                                   │
+│              ┌─────────────────┐                           │
+│              │  Context Output │                           │
+│              │  for LLM        │                           │
+│              └─────────────────┘                           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Test Results**: 25/25 PASSED
+- ✓ Memory Retriever: search, context retrieval, strategies
+- ✓ Working Memory: add, capacity, search, rehearsal, attention, chunking
+- ✓ Orchestrator: classify, store (WM/LTM), retrieve, consolidate
+- ✓ Module exports: all new classes available
+
+**Files Creati**:
+- `scarlet/src/memory/memory_retriever.py` - Memory Retriever (446 righe)
+- `scarlet/src/memory/working_memory.py` - Working Memory (454 righe)
+- `scarlet/src/memory/memory_orchestrator.py` - Orchestrator (588 righe)
+- `scarlet/tests/test_humanlike_memory.py` - Test suite completa
+
+**Files Modificati**:
+- `scarlet/src/memory/__init__.py` - Esportati nuovi moduli (v2.0.0)
+- `scarlet/src/memory/qdrant_manager.py` - Fix query_points parsing
+- `scarlet/requirements.txt` - Aggiunto redis>=5.0.0
+
+**Documentazione Associata**:
+- [memory-system-architecture.md](docs/specifications/memory-system-architecture.md) - Design document
+
+**Prossimi Step**:
+- Integrare Memory Retriever come tool Letta per Scarlet
+- Installare redis nel container webhook
+- Completare emotional valence model
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #memory #humanlike #retriever #working-memory #orchestrator #milestone
 
 ---
 

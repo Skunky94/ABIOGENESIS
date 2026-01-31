@@ -1,8 +1,9 @@
 # ABIOGENESIS - Scarlet Dependencies
-# Memory System - Qdrant Vector Database
+# Human-Like Memory System
 
 # Core
 qdrant-client>=1.7.0
+redis>=5.0.0
 
 # Optional: For faster vector operations
 # numpy>=1.24.0

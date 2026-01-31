@@ -395,7 +395,7 @@ class QdrantManager:
         
         try:
             # Use query_points for Qdrant v1.16+
-            results = self.client.query_points(
+            response = self.client.query_points(
                 collection_name=collection_name,
                 query=query_vector,
                 limit=limit,
@@ -406,18 +406,29 @@ class QdrantManager:
                     exact=False,
                 ),
             )
-            # QueryResponse returns named tuples or dicts
+            
+            # QueryResponse has .points attribute with ScoredPoint objects
             parsed_results = []
-            for r in results:
-                if isinstance(r, tuple) and len(r) >= 2:
-                    # It's a tuple (payload, score) or similar
-                    parsed_results.append((r[0], r[1]))
-                elif hasattr(r, 'payload') and hasattr(r, 'score'):
-                    # It's an object with attributes
-                    parsed_results.append((r.payload, r.score))
-                else:
-                    # Try to access as dict
-                    parsed_results.append((r.get('payload', {}), r.get('score', 0.0)))
+            
+            # Handle QueryResponse object
+            points = response.points if hasattr(response, 'points') else response
+            
+            for r in points:
+                try:
+                    if hasattr(r, 'payload') and hasattr(r, 'score'):
+                        # ScoredPoint object
+                        score = float(r.score) if not isinstance(r.score, (int, float)) else r.score
+                        parsed_results.append((r.payload, score))
+                    elif isinstance(r, tuple) and len(r) >= 2:
+                        # Tuple (payload, score)
+                        parsed_results.append((r[0], float(r[1])))
+                    elif isinstance(r, dict):
+                        # Dict with payload and score
+                        parsed_results.append((r.get('payload', {}), float(r.get('score', 0.0))))
+                except (TypeError, ValueError) as e:
+                    logger.warning(f"Failed to parse result: {e}")
+                    continue
+                    
             return parsed_results
         except Exception as e:
             logger.error(f"Search failed: {e}")

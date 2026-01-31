@@ -5,12 +5,13 @@ This package contains:
 - qdrant_manager: Qdrant vector database operations
 - embedding_manager: Embedding generation using BGE-m3
 - memory_blocks: Extended memory block definitions
+- memory_retriever: Memory search and retrieval tool
+- working_memory: Redis-based working memory
 - memory_orchestrator: Central memory controller
-- consolidation: Sleep-time memory consolidation
 
 Author: ABIOGENESIS Team
-Version: 1.0.0
-Date: 2026-01-31
+Version: 2.0.0
+Date: 2026-02-01
 """
 
 from .qdrant_manager import (
@@ -41,6 +42,36 @@ from .memory_blocks import (
     ALL_MEMORY_BLOCKS,
 )
 
+from .memory_retriever import (
+    MemoryRetriever,
+    RetrievalResult,
+    RetrievalStrategy,
+    get_retriever,
+    memory_search_tool,
+    memory_context_tool,
+    MEMORY_SEARCH_TOOL,
+)
+
+from .working_memory import (
+    WorkingMemory,
+    WorkingMemoryItem,
+    WorkingMemoryItemType,
+    get_working_memory,
+)
+
+from .memory_orchestrator import (
+    MemoryOrchestrator,
+    MemoryRequest,
+    MemoryResponse,
+    MemoryOperation,
+    ContentCategory,
+    ConsolidationResult,
+    get_orchestrator,
+    remember,
+    recall,
+    get_context,
+)
+
 __all__ = [
     # Qdrant
     "QdrantManager",
@@ -64,4 +95,28 @@ __all__ = [
     "MemoryManager",
     "EXTENDED_MEMORY_BLOCKS",
     "ALL_MEMORY_BLOCKS",
+    # Memory Retriever
+    "MemoryRetriever",
+    "RetrievalResult",
+    "RetrievalStrategy",
+    "get_retriever",
+    "memory_search_tool",
+    "memory_context_tool",
+    "MEMORY_SEARCH_TOOL",
+    # Working Memory
+    "WorkingMemory",
+    "WorkingMemoryItem",
+    "WorkingMemoryItemType",
+    "get_working_memory",
+    # Orchestrator
+    "MemoryOrchestrator",
+    "MemoryRequest",
+    "MemoryResponse",
+    "MemoryOperation",
+    "ContentCategory",
+    "ConsolidationResult",
+    "get_orchestrator",
+    "remember",
+    "recall",
+    "get_context",
 ]
