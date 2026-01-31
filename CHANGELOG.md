@@ -2,7 +2,73 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.2.3
+**Version**: 0.2.4
+
+---
+
+## 2026-02-01 - Project Cleanup & Reorganization
+
+### CLEANUP-001: Pulizia File Obsoleti e Riorganizzazione
+**Descrizione**: Rimossi file legacy, script obsoleti e riorganizzato il progetto per una struttura pulita.
+
+**Files Rimossi**:
+- `scarlet/src/sleep_webhook_v2.py` - Versione obsoleta (threading)
+- `scarlet/check_sleeptime.py` - Script debug con ID vecchi
+- `scarlet/check_sleep_agent.py` - Script debug one-off
+- `scarlet/cleanup_agents.py` - Utility obsoleta
+- `scarlet/manage_agent.py` - Sostituito da recreate_agents.py
+- `scarlet/archive/*` - Scripts legacy (recreate_*.py vecchi)
+- `scarlet/letta-source/` - Source Letta (usiamo Docker image)
+- `scarlet/scripts/` - setup.sh non usato (Windows)
+- `scarlet/tests/debug_sleep_agent.py` - Debug one-off
+- `scarlet/tests/test_sleep_5turns.py` - Test con ID vecchi
+- `scarlet/tests/test_sleep_chat.py` - Test obsoleto
+- `scarlet/tests/test_sleep_python.py` - Test obsoleto
+- `scarlet/tests/test_sleep_reflect.py` - Test obsoleto
+- `scarlet/**/__pycache__/` - Cache Python
+- `scarlet/.pytest_cache/` - Cache pytest
+
+**Struttura Finale Scarlet**:
+```
+scarlet/
+├── docker-compose.yml      # Orchestrazione servizi
+├── Dockerfile.webhook      # Build webhook
+├── .env                    # Configurazione
+├── requirements.txt        # Dipendenze
+├── recreate_agents.py      # Recovery script
+├── README.md               # Quickstart
+├── docs/
+│   └── sleep-webhook-deployment.md
+├── prompts/
+│   ├── system.txt          # Prompt primario
+│   └── system_sleep.txt    # Prompt sleep agent
+├── src/
+│   ├── __init__.py
+│   ├── scarlet_agent.py    # Core agent (1000+ lines)
+│   ├── sleep_webhook.py    # Webhook service (450 lines)
+│   ├── memory/
+│   │   ├── __init__.py
+│   │   ├── qdrant_manager.py    # Qdrant operations
+│   │   ├── memory_blocks.py     # Memory types
+│   │   └── embedding_manager.py # BGE-m3 embeddings
+│   └── tools/
+│       └── __init__.py
+└── tests/
+    ├── __init__.py
+    ├── test_embeddings.py
+    ├── test_memory_blocks.py
+    ├── test_memory_complete.py
+    ├── test_memory_integration.py
+    ├── test_qdrant_memory.py
+    ├── test_sleep_time_custom.py
+    └── test_sleep_webhook.py
+```
+
+**Spazio Recuperato**: ~50MB (principalmente letta-source)
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #cleanup #organization #maintenance
 
 ---
 
