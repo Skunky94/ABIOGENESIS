@@ -2,7 +2,41 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.3.3
+**Version**: 0.3.4
+
+---
+
+## 2026-02-01 - Emotions Collection Recreated (1024-dim)
+
+### MEMORY-008: Ricreazione Collection Emotions con Dimensione Corretta
+
+**Descrizione**: Ricreata la collection `emotions` con 1024 dimensioni per allinearla con BGE-m3. Ora tutte le collections usano lo stesso modello di embedding.
+
+**Problema Risolto**:
+- Collection `emotions` aveva 512 dimensioni (incompatibile con BGE-m3 1024-dim)
+- Il retrieval automatico la skippava per evitare errori
+
+**Azioni Eseguite**:
+1. Eliminata collection `emotions` (512-dim, 5 punti persi)
+2. Ricreata con 1024 dimensioni + INT8 quantization
+3. Aggiornato `sleep_webhook.py` per includere `emotions` nel retrieval
+
+**Stato Finale Collections**:
+| Collection | Punti | Dimensioni | Status |
+|------------|-------|------------|--------|
+| episodes   | 2     | 1024       | green  |
+| concepts   | 8     | 1024       | green  |
+| skills     | 0     | 1024       | green  |
+| emotions   | 0     | 1024       | green  |
+
+**Files Modificati**:
+- `scarlet/src/sleep_webhook.py` - Aggiunto `emotions` alla lista collections per retrieval
+
+**Note**: 5 punti della vecchia collection emotions sono stati persi (erano test data comunque).
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #memory #qdrant #emotions #dimensions #fix
 
 ---
 

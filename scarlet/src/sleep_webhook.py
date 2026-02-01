@@ -229,11 +229,9 @@ async def search_all_collections(
     
     Returns dict of collection_name -> list of (payload, score).
     
-    Note: emotions collection uses 512-dim vectors (different model),
-    so we skip it for now with 1024-dim BGE-m3 embeddings.
+    All collections now use 1024-dim BGE-m3 embeddings.
     """
-    # Skip 'emotions' - uses 512-dim vectors vs our 1024-dim BGE-m3
-    collections = ["episodes", "concepts", "skills"]
+    collections = ["episodes", "concepts", "skills", "emotions"]
     
     # Search all collections in parallel
     tasks = [
