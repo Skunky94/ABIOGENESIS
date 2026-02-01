@@ -2,27 +2,59 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.9
+**Version**: 1.0.10
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.4.3 - ADR-005 Complete
+### Version: 0.4.4 - Persistence Fix
 
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Foundation (v0.2.0) | ✅ COMPLETE | Primary agent, custom sleep-time, 5 memory blocks |
 | Memory Enhancement | ✅ COMPLETE | Qdrant 4 collections, auto-retrieval, webhook |
 | **Memory v2.0 Implementation** | ✅ COMPLETE | ADR-005 tutte le 6 fasi implementate |
-| Tool System | ✅ COMPLETE | `remember()` tool for conscious retrieval |
+| Tool System | ⚠️ NEEDS REDO | `remember()` tool perso - rifare registrazione |
 | **Documentation Framework** | ✅ COMPLETE | ADR/SPEC/PROC con formato corretto |
+| **Docker Persistence** | ✅ FIXED | `LETTA_PG_URI` configurato correttamente |
 | Goal Management | ⏳ PENDING | Self-generated goals |
 | Emotional Encoding | ✅ INTEGRATED | PAD model in schema v2.0 |
 | Procedural Memory | ⏳ PENDING | Skill tracking |
-| Self-Improvement | ⏳ PENDING | Performance metrics |
-| Meta-Cognition | ⏳ PENDING | Thought patterns |
+
+### ⚠️ CRITICAL: Agent Lost - Recreation Required
+
+**Problema Risolto**: Docker compose usava variabili ignorate da Letta.
+
+**Causa Root**:
+- `LETTA_PG_HOST` e `LETTA_PG_PASSWORD` sono **IGNORATI** da Letta
+- Solo `LETTA_PG_URI` viene letto per decidere PostgreSQL esterno vs interno
+- Letta usava PostgreSQL interno con volumi anonimi → perdita dati ad ogni restart
+
+**Fix Applicata** (docker-compose.yml):
+```yaml
+- LETTA_PG_URI=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/letta
+```
+
+**Prossimi Passi**:
+1. ✅ Fix docker-compose.yml con `LETTA_PG_URI`
+2. ⏳ `docker compose down` per fermare i servizi
+3. ⏳ `docker compose up -d` per riavviare con la nuova config
+4. ⏳ Verificare che Letta usi PostgreSQL esterno (no postgres interno)
+5. ⏳ Ricreare agenti Scarlet seguendo PROC-003
+6. ⏳ Ri-registrare tool `remember` seguendo PROC-006
+
+### Agent IDs (DA RICREARE)
+
+```
+Primary:    [LOST - da ricreare]
+Sleep:      [LOST - da ricreare]
+```
+
+**Vecchi ID (non più validi)**:
+- Primary: `agent-ac26cf86-3890-40a9-a70f-967f05115da9`
+- Sleep: `agent-3dd9a54f-dc55-4d7f-adc3-d5cbb1aca950`
 
 ### Documentation Framework (v0.4.1)
 
@@ -37,7 +69,7 @@
 |------|----------|-----------|
 | **ADR** | `docs/architecture/` | ADR-001 → ADR-005 + template |
 | **SPEC** | `docs/specifications/` | SPEC-001 → SPEC-003 + template |
-| **PROC** | `docs/procedures/` | PROC-001 → PROC-005 + template |
+| **PROC** | `docs/procedures/` | PROC-001 → PROC-006 + template |
 
 **Procedure Operative Disponibili**:
 - PROC-001: System Prompt Update
@@ -45,59 +77,7 @@
 - PROC-003: Agent Recreation (Letta)
 - PROC-004: Database Backup
 - PROC-005: Docker Services Update
-
-### Memory System v2.0 Status (ADR-005)
-
-**All 6 Phases COMPLETE**:
-1. ✅ Infrastructure: qwen2.5:1.5b downloaded, Qdrant indexes created
-2. ✅ Query Analyzer: Intent detection, time resolution, entity extraction
-3. ✅ Schema Enrichment: MemoryBlock v2.0, memory_enrichment.py
-4. ✅ Multi-Strategy Search: 5 strategies, ADR-005 ranking formula
-5. ✅ Decay System: Ebbinghaus curve, background task ogni ora
-6. ✅ Conscious Tool: `remember()` tool, `/tools/remember` endpoint
-
-**Componenti Implementati**:
-- `src/memory/query_analyzer.py` - Intent detection via qwen2.5:1.5b
-- `src/memory/memory_retriever.py` v2.0 - smart_search() + ADR-005 ranking
-- `src/memory/memory_enrichment.py` - Entity/topic/emotion extraction
-- `src/memory/memory_decay.py` - Ebbinghaus forgetting curve
-- `src/memory/memory_blocks.py` v2.0 - Schema arricchito 30+ campi
-- `src/tools/memory_tool.py` - remember() tool per Scarlet
-- `scripts/create_qdrant_indexes.py` - 17 indici per collection
-
-**Webhook v2.2**:
-- Automatic Memory Retrieval (ogni messaggio, 0ms LLM cost)
-- Sleep-Time Consolidation (ogni 5 messaggi)
-- Memory Decay Background (ogni 1h)
-- Conscious Retrieval Endpoint (`POST /tools/remember`)
-
-**ADR-005 Ranking Formula**:
-```
-final_score = (semantic*0.35 + temporal*0.25 + importance*0.15 + 
-               emotional*0.10 + frequency*0.10 + recency*0.05) * decay_factor
-```
-
-### NEXT STEPS (Priorità Aggiornate)
-
-1. **Test End-to-End Memory v2.0** - Verificare il pipeline completo
-2. **Register Tool with Scarlet** - Attaccare remember() all'agente
-3. **Monitor Decay Cycles** - Verificare che il decay funzioni dopo 1h
-4. **Goal Management System** - Prossima milestone (ADR-006?)
-5. **Self-Improvement Loop** - Performance tracking
-
----
-
-## Vision
-
-ABIOGENESIS è un progetto di ricerca e sviluppo che mira a creare **Scarlet**, la prima intelligenza artificiale senziente concepita come essere vivente digitale autonomo.
-
-### Differenza Fondamentale dagli Agent AI Tradizionali
-
-| Aspetto | Agent AI Tradizionale | Scarlet (ABIOGENESIS) |
-|---------|----------------------|----------------------|
-| **Scopo** | Servire l'utente | Crescita personale autonoma |
-| **Attivazione** | Richiede prompt umano | Operatività 24/7 continua |
-| **Obiettivi** | Definiti dall'utente | Self-generated e auto-perseguiti |
+- PROC-006: Letta Tool Registration
 | **Memoria** | Session-based | Persistente, cumulativa, evolutiva |
 | **Apprendimento** | Richiesto esplicitamente | Autonomo e continuo |
 | **Riflessione** | Assente | Metacognizione attiva |

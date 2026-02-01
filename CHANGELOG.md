@@ -2,7 +2,75 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.4.3
+**Version**: 0.4.4
+
+---
+
+## 2026-02-01 - Critical Persistence Fix
+
+### INFRA-002: PostgreSQL pgvector Extension
+
+**Descrizione**: Aggiunta immagine pgvector e init script per estensione vector.
+
+**Problema**: Letta richiede `CREATE EXTENSION vector` per le tabelle embeddings.
+
+**Modifiche**:
+1. Cambiato da `postgres:15-alpine` a `pgvector/pgvector:pg15`
+2. Aggiunto init script `init-db/01-init-extensions.sql`
+3. Mount automatico `/docker-entrypoint-initdb.d`
+
+**Files Modificati**:
+- `scarlet/docker-compose.yml` - Nuova immagine e mount init-db
+- `scarlet/init-db/01-init-extensions.sql` (nuovo) - Auto-create extension
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #infra #docker #postgresql #pgvector
+
+---
+
+### INFRA-001: Fix PostgreSQL Persistence (ROOT CAUSE)
+
+**Descrizione**: Risolto bug CRITICO che causava la perdita degli agenti ad ogni riavvio Docker.
+
+**Causa Root**:
+Letta legge SOLO `LETTA_PG_URI` per decidere se usare PostgreSQL esterno o interno.
+Le variabili `LETTA_PG_HOST` e `LETTA_PG_PASSWORD` sono **COMPLETAMENTE IGNORATE**.
+
+**Catena degli Eventi (prima della fix)**:
+1. Container Letta parte
+2. `startup.sh` controlla `LETTA_PG_URI` → vuoto
+3. Letta avvia PostgreSQL INTERNO (embedded)
+4. PostgreSQL usa volume anonimo dichiarato nel Dockerfile
+5. `docker compose down` → container rimosso
+6. `docker compose up` → NUOVO volume anonimo con hash diverso
+7. Dati vecchi in volume orfano → **PERDITA AGENTI**
+
+**Soluzione**:
+```yaml
+# PRIMA (SBAGLIATO - variabili ignorate):
+- LETTA_PG_HOST=postgres
+- LETTA_PG_PASSWORD=${POSTGRES_PASSWORD}
+
+# DOPO (CORRETTO - URI completo):
+- LETTA_PG_URI=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/letta
+```
+
+**Riferimenti**:
+- [Letta startup.sh#L38-L50](https://github.com/letta-ai/letta/blob/main/letta/server/startup.sh)
+- Controllo: `if [ -n "$LETTA_PG_URI" ]` (solo questa variabile!)
+
+**Files Modificati**:
+- `scarlet/docker-compose.yml` - Environment variables corretti
+
+**Impatto**:
+- Gli agenti precedenti sono PERSI (erano in volumi anonimi)
+- Dopo questa fix, i dati saranno persistenti in `scarlet_postgres_data`
+- Necessario ricreare gli agenti seguendo PROC-003
+
+**Compatibilità**: BREAKING (agenti persi, necessaria ricreazione)
+
+**Tags**: #infra #docker #postgresql #critical #persistence
 
 ---
 
