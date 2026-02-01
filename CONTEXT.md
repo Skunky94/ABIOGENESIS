@@ -2,14 +2,14 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.8
+**Version**: 1.0.9
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.4.2 - Documentation Consistency
+### Version: 0.4.3 - ADR-005 Complete
 
 | Phase | Status | Progress |
 |-------|--------|----------|

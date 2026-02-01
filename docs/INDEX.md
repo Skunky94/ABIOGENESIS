@@ -3,7 +3,7 @@
 **Version**: 1.3.0  
 **Updated**: 2026-02-01  
 **Maintainer**: IDE Agent (GitHub Copilot / Claude)
-**Project Version**: 0.4.2
+**Project Version**: 0.4.3
 
 ---
 

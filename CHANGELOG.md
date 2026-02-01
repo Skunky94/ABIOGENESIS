@@ -2,7 +2,39 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.4.2
+**Version**: 0.4.3
+
+---
+
+## 2026-02-01 - Tool Registration
+
+### ADR005-FINAL: Registrazione Tool `remember`
+
+**Descrizione**: Completato ADR-005 Phase 6 - Registrato il tool `remember` con l'agente Scarlet.
+
+**Tool Registrato**:
+- **Nome**: `remember`
+- **ID**: `tool-ae8f3fd1-c853-4381-b342-a7ea7b59133e`
+- **Funzione**: Ricerca conscia nella memoria (Query Analyzer + Multi-Strategy + Ranking)
+- **Endpoint**: `/tools/remember` sul webhook
+
+**Script creato**:
+- `scarlet/register_remember_tool.py` - Script riutilizzabile per registrazione tool
+
+**Tool collegati a Scarlet**:
+- `remember` - Ricerca memoria conscia (ADR-005)
+- `conversation_search` - Ricerca conversazioni Letta
+- `memory_insert` - Inserimento memoria Letta
+- `memory_replace` - Sostituzione memoria Letta
+
+**Nota**: Rilevato errore autenticazione LLM (MiniMax) non correlato alla registrazione.
+
+**Files Modificati**:
+- `scarlet/register_remember_tool.py` (nuovo)
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #adr-005 #tool #memory #letta
 
 ---
 
