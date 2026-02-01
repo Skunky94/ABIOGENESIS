@@ -1,0 +1,26 @@
+# Requirements for Scarlet Autonomy Runtime
+# ADR-006: Continuous Existence Runtime
+
+# Async HTTP client
+aiohttp>=3.9.0
+
+# Redis async client
+redis[hiredis]>=5.0.0
+
+# Qdrant vector DB client
+qdrant-client>=1.7.0
+
+# YAML config parsing
+pyyaml>=6.0
+
+# UUID generation (stdlib, but explicit)
+# Already included in Python
+
+# Type hints
+typing-extensions>=4.9.0
+
+# Logging (stdlib, but explicit)
+# Already included in Python
+
+# Optional: Prometheus metrics export
+# prometheus-client>=0.19.0

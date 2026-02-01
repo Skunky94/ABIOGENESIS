@@ -23,7 +23,7 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 | Layer | Nome | Status | Progress |
 |-------|------|--------|----------|
 | L0 | Foundation | ✅ COMPLETE | 100% |
-| L1 | Continuous Existence | 🔄 IN PROGRESS | 75% |
+| L1 | Continuous Existence | ✅ CODE COMPLETE | 95% |
 | L2 | Self-Model | ⏳ PENDING | 0% |
 | L3 | Reflection | ⏳ PENDING | 0% |
 | L4 | Agency | ⏳ PENDING | 0% |
@@ -72,13 +72,14 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 
 ---
 
-## ⏳ LAYER 1: CONTINUOUS EXISTENCE
+## ✅ LAYER 1: CONTINUOUS EXISTENCE
 
-**Status**: 🔄 IN PROGRESS (SPEC completa, ADR pending)  
+**Status**: ✅ CODE COMPLETE (deploy pending)  
 **Dipendenze**: Layer 0 ✅  
 **Obiettivo**: Scarlet esiste e opera senza bisogno di trigger umani.
+**CNG**: [CNG-017](changelogs/cng-017-autonomy-runtime-implementation.md)
 
-### 1.1 Autonomous Loop
+### 1.1 Autonomous Loop ✅
 **SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: [ADR-006](architecture/adr-006-continuous-existence-runtime.md) ✅
 
 > Come Scarlet vive continuamente senza input esterni?
@@ -91,13 +92,13 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 - ✅ Working Set per persistenza tra tick
 - ✅ Environment Snapshot ad ogni invocazione
 
-**Componenti previsti**:
-- `scarlet/src/runtime/loop.py` - Main loop orchestrator
-- `scarlet/src/runtime/config.py` - Configuration loader
-- `scarlet/src/runtime/state.py` - State machine
-- `scarlet/config/runtime.yaml` - Config file
+**Componenti IMPLEMENTATI** (CNG-017):
+- ✅ `scarlet/src/runtime/loop.py` - Main loop orchestrator
+- ✅ `scarlet/src/runtime/config.py` - Configuration loader
+- ✅ `scarlet/src/runtime/state.py` - State machine
+- ✅ `scarlet/config/runtime.yaml` - Config file
 
-### 1.2 Performance Monitor
+### 1.2 Performance Monitor ✅
 **SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: [ADR-006](architecture/adr-006-continuous-existence-runtime.md) ✅
 
 > Come Scarlet sa se sta funzionando correttamente?
@@ -109,12 +110,12 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 - ✅ MiniMax budget tracking con rolling window (5000/5h)
 - ✅ Throttling non distruttivo (attesa, non errore)
 
-**Componenti previsti**:
-- `scarlet/src/runtime/budget.py` - Budget tracker (Redis)
-- `scarlet/src/runtime/metrics.py` - Metrics collection
-- `scarlet/src/runtime/runaway.py` - Runaway detection
+**Componenti IMPLEMENTATI** (CNG-017):
+- ✅ `scarlet/src/runtime/budget.py` - Budget tracker (Redis)
+- ✅ `scarlet/src/runtime/metrics.py` - Metrics collection
+- ✅ `scarlet/src/runtime/runaway.py` - Runaway detection
 
-### 1.3 Error Detection & Resilience
+### 1.3 Error Detection & Resilience ✅
 **SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: [ADR-006](architecture/adr-006-continuous-existence-runtime.md) ✅
 
 > Come Scarlet rileva e gestisce i propri errori?
@@ -127,10 +128,18 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 - ✅ Mitigazioni senza spegnere: throttle, replan, park, sleep/dream
 - ✅ Error journal in Qdrant collection dedicata
 
-**Componenti previsti**:
-- `scarlet/src/runtime/circuit_breaker.py` - Circuit breaker
-- `scarlet/src/runtime/learning_events.py` - Learning Event emission
-- Qdrant collections: `learning_events`, `error_journal`
+**Componenti IMPLEMENTATI** (CNG-017):
+- ✅ `scarlet/src/runtime/circuit_breaker.py` - Circuit breaker
+- ✅ `scarlet/src/runtime/learning_events.py` - Learning Event emission
+- ✅ Qdrant collections: `learning_events`, `error_journal`
+- ✅ `scarlet/src/runtime/working_set.py` - Working set manager
+
+### 1.4 Next Step: Deploy
+**Status**: ⏳ PENDING
+
+```bash
+cd scarlet && docker compose up -d autonomy-runtime
+```
 
 ---
 

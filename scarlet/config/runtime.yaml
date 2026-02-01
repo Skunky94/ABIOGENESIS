@@ -1,0 +1,164 @@
+# =============================================================================
+# SCARLET AUTONOMY RUNTIME - Configuration
+# =============================================================================
+# Version: 1.0.0
+# ADR: ADR-006 (Continuous Existence Runtime)
+# SPEC: SPEC-004 (Continuous Existence)
+#
+# This file controls the continuous existence loop for Scarlet.
+# All parameters can be modified without rebuilding the container.
+# =============================================================================
+
+# === RUNTIME LOOP ===
+loop:
+  tick_interval_base_s: 30          # Base interval between ticks
+  tick_interval_min_s: 10           # Minimum interval (high activity)
+  tick_interval_max_s: 300          # Maximum interval (throttling/idle)
+
+# === LETTA CONFIGURATION ===
+letta:
+  api_url: "http://abiogenesis-letta:8283"
+  agent_id: "agent-505ba047-87ce-425a-b9ba-1d3fac259c62"
+  timeout_s: 60
+
+# === BUDGET / QUOTA ===
+budget:
+  minimax:
+    requests_limit: 5000            # Max requests per window
+    window_seconds: 18000           # 5 hours rolling window
+    throttle_threshold: 0.9         # Start throttling at 90% usage
+    reserve_for_sleep: 100          # Keep reserved for sleep agent
+
+# === STATE MACHINE ===
+states:
+  initial: "idle"
+  allowed_transitions:
+    idle: [thinking, sleeping, dreaming]
+    thinking: [acting, idle, sleeping]
+    acting: [thinking, idle, sleeping]
+    sleeping: [idle, dreaming]
+    dreaming: [idle, sleeping]
+  
+  # NOTE: SLEEPING/DREAMING transitions are defined but NOT IMPLEMENTED yet
+  # They will be enabled when ROADMAP L3.4 (Authentic Sleep/Dream Cycle) is implemented
+  # For L1, only IDLE <-> THINKING <-> ACTING are active
+
+# === IDLE ACTIVITIES (Proactive Exploration) ===
+# When in IDLE state, Scarlet doesn't "wait" - she explores proactively
+idle:
+  activities:
+    memory_wandering:
+      enabled: true
+      weight: 0.25                  # Selection probability
+      max_ticks: 3                  # Max ticks per session
+      description: "Recall old memories to rebuild continuity"
+    
+    self_reflection:
+      enabled: true
+      weight: 0.20
+      max_ticks: 2
+      description: "Think about recent actions and decisions"
+    
+    capability_audit:
+      enabled: true
+      weight: 0.15
+      max_ticks: 2
+      cooldown_hours: 24            # Don't repeat too often
+      description: "Examine own capabilities, discover gaps"
+    
+    curiosity_research:
+      enabled: true
+      weight: 0.20
+      max_ticks: 4
+      requires_internet: true       # Flag for future capabilities
+      description: "Search for information on interesting topics"
+    
+    goal_contemplation:
+      enabled: true
+      weight: 0.10
+      max_ticks: 2
+      description: "Reflect on goals and desires"
+    
+    relationship_review:
+      enabled: true
+      weight: 0.10
+      max_ticks: 2
+      description: "Think about known people"
+  
+  # After how many IDLE ticks to consider SLEEPING (when implemented)
+  sleep_after_ticks: 10
+
+# === RUNAWAY DETECTION ===
+runaway:
+  window_ticks: 20                  # Observation window (N ticks)
+  window_seconds: 600               # Time window (10 min)
+  score_threshold: 0.7              # Score threshold for runaway detection
+  consecutive_ticks: 5              # Consecutive ticks above threshold
+  
+  # Weights for runaway score (must sum to 1.0)
+  weights:
+    progress_absence: 0.40          # Absence of progress markers
+    trigger_density: 0.20           # Too many LLM triggers / minute
+    signature_repetition: 0.25      # Repeated action signatures
+    error_streak: 0.15              # Consecutive errors
+
+# === PROGRESS MARKERS ===
+progress:
+  # What counts as "significant progress"
+  significant_changes:
+    - continuation_ref_change       # Task/thread reference change
+    - evidence_outcome              # Verification with outcome
+    - working_set_step_advance      # New step in working set
+    - task_state_change             # pending -> active -> done
+  
+  # What doesn't count (noise)
+  noise_patterns:
+    - intent_rephrase_only          # Just rephrasing same intent
+    - confidence_change_only        # Only confidence changed
+    - timestamp_only                # Only timestamp updated
+
+# === CIRCUIT BREAKER ===
+circuit_breaker:
+  error_threshold: 5                # Errors before opening circuit
+  reset_timeout_s: 60               # Seconds before attempting reset
+  half_open_max_calls: 2            # Test calls in half-open state
+
+# === BACKOFF ===
+backoff:
+  initial_s: 5                      # Initial backoff duration
+  multiplier: 2.0                   # Exponential multiplier
+  max_s: 300                        # Maximum backoff (5 minutes)
+  jitter: 0.1                       # Random jitter factor (10%)
+
+# === STORAGE ===
+storage:
+  redis:
+    host: "abiogenesis-redis"
+    port: 6379
+    db: 0
+    key_prefix: "scarlet:runtime:"
+    # Key schemas:
+    # - {prefix}state              -> current RuntimeState
+    # - {prefix}working_set        -> JSON Working Set
+    # - {prefix}budget:requests    -> Sorted Set (timestamp, request_id)
+    # - {prefix}runaway:history    -> List of recent tick signatures
+    # - {prefix}circuit:state      -> Circuit breaker state
+  
+  qdrant:
+    host: "abiogenesis-qdrant"
+    port: 6333
+    collections:
+      learning_events: "learning_events"
+      error_journal: "error_journal"
+
+# === LOGGING ===
+logging:
+  level: "INFO"                     # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  
+# === HEALTH CHECK ===
+health:
+  port: 8285
+  endpoint: "/health"
+  liveness_path: "/healthz"
+  readiness_path: "/ready"

@@ -1,0 +1,44 @@
+# Dockerfile for Scarlet Autonomy Runtime
+# ADR-006: Continuous Existence Runtime
+
+FROM python:3.11-slim
+
+# Labels
+LABEL maintainer="ABIOGENESIS Project"
+LABEL description="Scarlet Autonomy Runtime - Continuous Existence"
+LABEL version="1.0.0"
+
+# Set work directory
+WORKDIR /app
+
+# Environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for layer caching
+COPY requirements-runtime.txt /app/
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements-runtime.txt
+
+# Copy runtime source code
+COPY src/runtime/ /app/runtime/
+COPY config/ /app/config/
+
+# Create non-root user
+RUN useradd -m -u 1000 scarlet && chown -R scarlet:scarlet /app
+USER scarlet
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${HEALTH_PORT:-8285}/health || exit 1
+
+# Default command
+CMD ["python", "-m", "runtime.loop"]

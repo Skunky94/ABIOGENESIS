@@ -9,8 +9,8 @@
 
 services:
   letta-server:
-    # Immagine Letta originale
-    image: letta/letta:latest
+    # Immagine Letta 0.16.4 - con patch load_agent montata via volume
+    image: letta/letta:0.16.4
     container_name: abiogenesis-letta
     ports:
       - "8283:8283"
@@ -43,7 +43,6 @@ services:
       - ./data:/app/data:rw
       - ./prompts:/app/prompts:ro
       - ./.env:/app/.env:ro
-      # NOTE: mount MiniMax fix rimossi - file non presenti nel fork locale
     depends_on:
       postgres:
         condition: service_healthy
@@ -206,6 +205,62 @@ services:
       - abiogenesis-net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8284/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ====================================================================
+  # AUTONOMY-RUNTIME - Continuous Existence Service (ADR-006)
+  # ====================================================================
+  # The heart of Scarlet's autonomous existence.
+  # Implements the infinite tick loop that maintains continuity.
+  #
+  # Architecture:
+  # - Infinite tick loop (not a cron/scheduler)
+  # - State machine: IDLE → THINKING → ACTING
+  # - Budget tracking: shared MiniMax quota via Redis
+  # - Runaway detection: prevents pathological loops
+  # - Learning events: emits to Qdrant for future Learning Agent
+  #
+  # Layer: L1 (Continuous Existence)
+  # ADR: ADR-006
+  # SPEC: SPEC-004
+  # NOTE: Usa immagine base + mount per sviluppo veloce (no build)
+  autonomy-runtime:
+    image: python:3.11-slim
+    container_name: abiogenesis-autonomy-runtime
+    working_dir: /app
+    command: >
+      bash -c "pip install -q pyyaml aiohttp redis qdrant-client &&
+               python -m runtime.loop"
+    ports:
+      - "8285:8285"  # Health/metrics endpoint
+    environment:
+      - PYTHONPATH=/app
+      - LETTA_URL=http://letta-server:8283
+      - LETTA_AGENT_ID=${LETTA_AGENT_ID:-agent-505ba047-87ce-425a-b9ba-1d3fac259c62}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - HEALTH_PORT=8285
+      - CONFIG_PATH=/app/config/runtime.yaml
+    volumes:
+      - ./src/runtime:/app/runtime:ro
+      - ./config:/app/config:ro
+      - ./.env:/app/.env:ro
+    depends_on:
+      letta-server:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - abiogenesis-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8285/health"]
       interval: 30s
       timeout: 5s
       retries: 3

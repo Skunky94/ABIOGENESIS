@@ -2,14 +2,14 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.16
+**Version**: 1.0.17
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.4.10 - SLEEPING/DREAMING Clarification
+### Version: 0.5.0 - L1 Autonomy Runtime Implementation
 
 | Phase | Status | Progress |
 |-------|--------|----------|
@@ -19,10 +19,10 @@
 | Tool System | ✅ COMPLETE | `remember()` tool registrato (ADR-005) |
 | **Documentation Framework** | ✅ COMPLETE | ADR/SPEC/PROC/CNG con formato corretto |
 | **Docker Persistence** | ✅ FIXED | `LETTA_PG_URI` + pgvector configurati |
-| **Changelog System** | ✅ COMPLETE | Nuovo formato CNG (16 files) |
+| **Changelog System** | ✅ COMPLETE | Nuovo formato CNG (17 files) |
 | **Production Roadmap** | ✅ COMPLETE | 8 Layer verso v1.0 (docs/ROADMAP.md) |
 | **L1 Design** | ✅ COMPLETE | SPEC-004 + ADR-006 accepted |
-| **L1 Implementation** | ⏳ PENDING | autonomy-runtime da sviluppare |
+| **L1 Implementation** | ✅ CODE COMPLETE | autonomy-runtime modules creati |
 | Goal Management | ⏳ PENDING | Self-generated goals (Roadmap L4) |
 | Emotional Encoding | ✅ INTEGRATED | PAD model in schema v2.0 |
 | Procedural Memory | ⏳ PENDING | Skill tracking (Roadmap L6) |
@@ -34,7 +34,7 @@
 | Layer | Focus | Status |
 |-------|-------|--------|
 | L0 | Foundation | ✅ COMPLETE |
-| L1 | Continuous Existence | 🔄 ADR Done, Implementation Pending |
+| L1 | Continuous Existence | ✅ CODE COMPLETE (deploy pending) |
 | L2 | Self-Model | Planned |
 | L3 | Reflection | Planned (include L3.4 Authentic Sleep) |
 | L4 | Agency | Planned |
@@ -45,18 +45,24 @@
 
 **Full details**: [docs/ROADMAP.md](docs/ROADMAP.md)
 
-### L1 Architecture (ADR-006)
+### L1 Architecture (ADR-006) - IMPLEMENTED
 
-| Componente | Decisione |
-|------------|-----------|
-| Servizio | `autonomy-runtime` (container dedicato) |
-| Config | `scarlet/config/runtime.yaml` |
-| State Machine | IDLE → THINKING → ACTING → SLEEPING → DREAMING |
-| Budget | Redis rolling window 5000/5h |
-| Runaway | Score multi-fattore + Learning Events |
-| Storage | Redis (hot) + Qdrant (cold) |
+| Componente | File | Status |
+|------------|------|--------|
+| Config | `scarlet/config/runtime.yaml` | ✅ |
+| Config Loader | `src/runtime/config.py` | ✅ |
+| State Machine | `src/runtime/state.py` | ✅ |
+| Budget Tracker | `src/runtime/budget.py` | ✅ |
+| Working Set | `src/runtime/working_set.py` | ✅ |
+| Runaway Detector | `src/runtime/runaway.py` | ✅ |
+| Learning Events | `src/runtime/learning_events.py` | ✅ |
+| Circuit Breaker | `src/runtime/circuit_breaker.py` | ✅ |
+| Metrics | `src/runtime/metrics.py` | ✅ |
+| Main Loop | `src/runtime/loop.py` | ✅ |
+| Dockerfile | `Dockerfile.runtime` | ✅ |
+| Tests | `tests/test_autonomy_runtime.py` | ✅ |
 
-**Implementation Plan**: 4 settimane (vedi ADR-006 §Implementation Plan)
+**Next Step**: Deploy con `docker compose up -d autonomy-runtime`
 
 ### Agent IDs (ACTIVE)
 
@@ -78,6 +84,7 @@ Sleep:      agent-862e8be2-488a-4213-9778-19b372b5a04e
 | `abiogenesis-ollama` | ✅ Healthy | BGE-m3, qwen2.5:1.5b |
 | `abiogenesis-qdrant` | ✅ Running | 4 collections |
 | `abiogenesis-sleep-webhook` | ✅ Running | v2.2 |
+| `abiogenesis-autonomy-runtime` | ⏳ PENDING | Deploy required |
 
 ### Documentation System (v0.4.8)
 
