@@ -1,5 +1,6 @@
 # CNG-003: Documentazione Numerata Completa
 
+**ID**: DOCS-003  
 **Status**: Complete  
 **Date**: 2026-02-01  
 **Type**: DOCS  

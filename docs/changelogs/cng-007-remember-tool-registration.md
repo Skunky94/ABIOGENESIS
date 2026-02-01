@@ -1,5 +1,6 @@
 # CNG-007: Registrazione Tool `remember`
 
+**ID**: FEATURE-001  
 **Status**: Complete  
 **Date**: 2026-02-01  
 **Type**: FEATURE  

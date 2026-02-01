@@ -1,5 +1,6 @@
 # CNG-008: Fix PostgreSQL Persistence (ROOT CAUSE)
 
+**ID**: INFRA-001  
 **Status**: Complete  
 **Date**: 2026-02-01  
 **Type**: INFRA  

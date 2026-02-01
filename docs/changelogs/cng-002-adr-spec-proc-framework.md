@@ -1,5 +1,6 @@
 # CNG-002: Framework Documentazione ADR/SPEC/PROC
 
+**ID**: DOCS-002  
 **Status**: Complete  
 **Date**: 2026-02-01  
 **Type**: DOCS  

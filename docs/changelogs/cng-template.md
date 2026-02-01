@@ -1,10 +1,14 @@
 # CNG-XXX: Titolo Change
 
+**ID**: TYPE-NNN  
 **Status**: Complete  
 **Date**: YYYY-MM-DD HH:MM  
 **Type**: INFRA | DOCS | FEATURE | FIX | REFACTOR  
 **Breaking**: Yes/No  
 **Version**: 0.X.Y → 0.X.Z
+
+> **Nota**: L'ID segue il formato `TYPE-NNN` dove TYPE è il tipo di change e NNN è il numero progressivo per quel tipo.
+> Consultare CHANGELOG.md "Contatori per Tipo" per il prossimo ID disponibile.
 
 ---
 

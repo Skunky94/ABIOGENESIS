@@ -1,8 +1,9 @@
 # CNG-011: Ristrutturazione Sistema Changelog
 
+**ID**: DOCS-007  
 **Data**: 2026-02-01  
 **Tipo**: DOCS  
-**Versione**: 0.4.6  
+**Versione**: 0.4.5 → 0.4.6  
 **Breaking**: No
 
 ---

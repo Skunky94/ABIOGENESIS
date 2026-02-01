@@ -1,5 +1,6 @@
 # CNG-001: Riorganizzazione Completa Documentazione
 
+**ID**: DOCS-001  
 **Status**: Complete  
 **Date**: 2026-02-01  
 **Type**: DOCS  

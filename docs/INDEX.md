@@ -1,9 +1,9 @@
 # ABIOGENESIS - Documentation Index
 
-**Version**: 1.4.0  
+**Version**: 1.5.0  
 **Updated**: 2026-02-01  
 **Maintainer**: IDE Agent (GitHub Copilot / Claude)
-**Project Version**: 0.4.6
+**Project Version**: 0.4.7
 
 ---
 
@@ -13,13 +13,14 @@
 |--------------|-----------|
 | **Panoramica progetto** | [README.md](../README.md) |
 | **Stato attuale & next steps** | [CONTEXT.md](../CONTEXT.md) |
+| **🗺️ Roadmap v1.0** | [ROADMAP.md](ROADMAP.md) |
 | **Cronologia modifiche** | [CHANGELOG.md](../CHANGELOG.md) |
 | **Dettagli changelog** | [docs/changelogs/](changelogs/) (CNG-XXX) |
 | **Decisioni architetturali** | [docs/architecture/](architecture/) (ADR-XXX) |
 | **Specifiche tecniche** | [docs/specifications/](specifications/) (SPEC-XXX) |
 | **Procedure operative** | [docs/procedures/](procedures/) (PROC-XXX) |
 
-> 🚨 **ADR + SPEC + PROC + CNG** = Documentazione numerata critica. Consultare SEMPRE prima di implementazioni!
+> 🚨 **ROADMAP + ADR + SPEC + PROC + CNG** = Documentazione critica. Consultare SEMPRE prima di implementazioni!
 
 ---
 
@@ -80,6 +81,8 @@
 
 | CNG | Titolo | Tipo |
 |-----|--------|------|
+| [CNG-013](changelogs/cng-013-production-roadmap.md) | Production Roadmap | DOCS |
+| [CNG-012](changelogs/cng-012-readme-showcase.md) | README Vetrina GitHub | DOCS |
 | [CNG-011](changelogs/cng-011-changelog-restructure.md) | Ristrutturazione Changelog | DOCS |
 | [CNG-010](changelogs/cng-010-agent-recreation.md) | Ricreazione Agenti | FEATURE |
 | [CNG-009](changelogs/cng-009-pgvector-extension.md) | pgvector Extension | INFRA |
@@ -130,19 +133,22 @@
 
 ### 🚨 Regola Fondamentale
 **PRIMA di qualsiasi implementazione, azione o ragionamento esteso:**
-1. Verifica se esiste una **PROC** rilevante → Seguila
-2. Verifica se esiste un **ADR** rilevante → Rispettalo
-3. Verifica se esiste una **SPEC** rilevante → Allineati
+1. Consulta la **ROADMAP** → Cosa è la prossima priorità?
+2. Verifica se esiste una **PROC** rilevante → Seguila
+3. Verifica se esiste un **ADR** rilevante → Rispettalo
+4. Verifica se esiste una **SPEC** rilevante → Allineati
 
 ### Prima di Ogni Task
 1. Leggi `CONTEXT.md` per stato attuale
-2. Consulta ADR/SPEC/PROC rilevanti
-3. Verifica `CHANGELOG.md` per storia recente
+2. Consulta `ROADMAP.md` per priorità
+3. Consulta ADR/SPEC/PROC rilevanti
+4. Verifica `CHANGELOG.md` per storia recente
 
 ### Dopo Ogni Task
-1. Aggiorna `CHANGELOG.md` con formato standard
-2. Aggiorna `CONTEXT.md` se cambia lo stato
-3. NON aggiornare altri file a meno che non sia necessario
+1. Crea file CNG in `docs/changelogs/`
+2. Aggiorna `CHANGELOG.md` con link al CNG
+3. Aggiorna `CONTEXT.md` se cambia lo stato
+4. Aggiorna `ROADMAP.md` se completi un item
 
 ### File da NON Modificare Frequentemente
 - `README.md` - Solo per cambi vision/overview
@@ -151,16 +157,39 @@
 
 ---
 
+## 🗺️ Roadmap
+
+**Location**: [ROADMAP.md](ROADMAP.md)
+
+La roadmap definisce il percorso verso Scarlet v1.0 con 8 Layer di sviluppo:
+
+| Layer | Focus | Status |
+|-------|-------|--------|
+| L0 | Foundation | ✅ COMPLETE |
+| L1 | Continuous Existence | ⏳ Next |
+| L2 | Self-Model | Planned |
+| L3 | Reflection | Planned |
+| L4 | Agency | Planned |
+| L5 | Execution | Planned |
+| L6 | Growth | Planned |
+| L7 | Social | Planned |
+| L8 | Emotional | Parallel from L3 |
+
+**Workflow**: ROADMAP item → SPEC → ADR → Implementation → CNG
+
+---
+
 ## 🏷️ Version Tracking
 
 | Documento | Versione | Data |
 |-----------|----------|------|
-| INDEX.md | 1.4.0 | 2026-02-01 |
-| README.md | 0.4.6 | 2026-02-01 |
-| CONTEXT.md | 1.0.12 | 2026-02-01 |
-| CHANGELOG.md | 0.4.6 | 2026-02-01 |
+| INDEX.md | 1.5.0 | 2026-02-01 |
+| README.md | 0.4.7 | 2026-02-01 |
+| CONTEXT.md | 1.0.13 | 2026-02-01 |
+| CHANGELOG.md | 0.4.7 | 2026-02-01 |
+| ROADMAP.md | 1.0.0 | 2026-02-01 |
 | PROJECT_RULES.md | 1.0.0 | 2026-01-31 |
-| copilot-instructions.md | 2.0.0 | 2026-02-01 |
+| copilot-instructions.md | 2.1.0 | 2026-02-01 |
 
 ---
 

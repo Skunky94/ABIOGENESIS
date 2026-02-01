@@ -1,5 +1,6 @@
 # CNG-012: README Vetrina GitHub
 
+**ID**: DOCS-008  
 **Data**: 2026-02-01  
 **Tipo**: DOCS  
 **Versione**: 0.4.6  

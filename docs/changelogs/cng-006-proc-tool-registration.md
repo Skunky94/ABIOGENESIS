@@ -1,5 +1,6 @@
 # CNG-006: Procedura Registrazione Tool Letta
 
+**ID**: DOCS-006  
 **Status**: Complete  
 **Date**: 2026-02-01  
 **Type**: DOCS  

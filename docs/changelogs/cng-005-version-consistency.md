@@ -1,5 +1,6 @@
 # CNG-005: Allineamento Versioni e Regola Consistency
 
+**ID**: DOCS-005  
 **Status**: Complete  
 **Date**: 2026-02-01  
 **Type**: DOCS  

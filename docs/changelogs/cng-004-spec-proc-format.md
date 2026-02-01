@@ -1,5 +1,6 @@
 # CNG-004: Correzione Formato SPEC e PROC
 
+**ID**: DOCS-004  
 **Status**: Complete  
 **Date**: 2026-02-01  
 **Type**: DOCS  

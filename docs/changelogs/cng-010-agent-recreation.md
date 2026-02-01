@@ -1,5 +1,6 @@
 # CNG-010: Ricreazione Agenti e Tool
 
+**ID**: FEATURE-002  
 **Status**: Complete  
 **Date**: 2026-02-01  
 **Type**: FEATURE  

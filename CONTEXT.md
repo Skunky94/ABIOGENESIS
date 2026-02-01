@@ -2,14 +2,14 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.12
+**Version**: 1.0.13
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.4.6 - Changelog Restructured
+### Version: 0.4.7 - Production Roadmap
 
 | Phase | Status | Progress |
 |-------|--------|----------|
@@ -19,10 +19,29 @@
 | Tool System | ✅ COMPLETE | `remember()` tool registrato (ADR-005) |
 | **Documentation Framework** | ✅ COMPLETE | ADR/SPEC/PROC/CNG con formato corretto |
 | **Docker Persistence** | ✅ FIXED | `LETTA_PG_URI` + pgvector configurati |
-| **Changelog System** | ✅ COMPLETE | Nuovo formato CNG (v0.4.6) |
-| Goal Management | ⏳ PENDING | Self-generated goals |
+| **Changelog System** | ✅ COMPLETE | Nuovo formato CNG (13 files) |
+| **Production Roadmap** | ✅ COMPLETE | 8 Layer verso v1.0 (docs/ROADMAP.md) |
+| Goal Management | ⏳ PENDING | Self-generated goals (Roadmap L4) |
 | Emotional Encoding | ✅ INTEGRATED | PAD model in schema v2.0 |
-| Procedural Memory | ⏳ PENDING | Skill tracking |
+| Procedural Memory | ⏳ PENDING | Skill tracking (Roadmap L6) |
+
+### 🗺️ Roadmap Overview
+
+**Target**: Scarlet v1.0 - Autonomous Digital Being
+
+| Layer | Focus | Status |
+|-------|-------|--------|
+| L0 | Foundation | ✅ COMPLETE |
+| L1 | Continuous Existence | ⏳ Next Priority |
+| L2 | Self-Model | Planned |
+| L3 | Reflection | Planned |
+| L4 | Agency | Planned |
+| L5 | Execution | Planned |
+| L6 | Growth | Planned |
+| L7 | Social | Planned |
+| L8 | Emotional | Parallel from L3 |
+
+**Full details**: [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ### Agent IDs (ACTIVE)
 
@@ -45,16 +64,18 @@ Sleep:      agent-862e8be2-488a-4213-9778-19b372b5a04e
 | `abiogenesis-qdrant` | ✅ Running | 4 collections |
 | `abiogenesis-sleep-webhook` | ✅ Running | v2.2 |
 
-### Documentation System (v0.4.6)
+### Documentation System (v0.4.7)
 
 | Type | Location | Count |
 |------|----------|-------|
 | **ADR** | `docs/architecture/` | 5 + template |
 | **SPEC** | `docs/specifications/` | 3 + template |
 | **PROC** | `docs/procedures/` | 6 + template |
-| **CNG** | `docs/changelogs/` | 11 + template |
+| **CNG** | `docs/changelogs/` | 13 + template |
+| **ROADMAP** | `docs/ROADMAP.md` | 8 Layer roadmap |
 
 > Nuovo sistema CNG: CHANGELOG.md snello con link a file CNG dettagliati.
+> ROADMAP.md: Guida sviluppo verso v1.0
 
 ### Persistence Fix Applied (v0.4.4)
 

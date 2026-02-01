@@ -1,5 +1,6 @@
 # CNG-009: PostgreSQL pgvector Extension
 
+**ID**: INFRA-002  
 **Status**: Complete  
 **Date**: 2026-02-01  
 **Type**: INFRA  
