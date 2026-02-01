@@ -40,53 +40,132 @@ class MemoryType(Enum):
 @dataclass
 class MemoryBlock:
     """
-    A single memory entry.
+    A single memory entry (ADR-005 Human-Like Memory v2.0).
     
     Represents a unit of memory that can be stored in both
     Letta (as structured text) and Qdrant (as vectors).
+    
+    Schema v2.0 includes:
+    - Temporal fields (date, time_of_day, day_of_week)
+    - Emotional fields (valence, arousal, primary_emotion)
+    - Entity fields (participants, topics, related)
+    - Decay fields (decay_factor, access tracking)
     """
+    # Core identification
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     memory_type: MemoryType = MemoryType.EPISODIC
     title: str = ""
     content: str = ""
     embedding_text: str = ""  # Text optimized for embedding generation
-    importance: float = 0.5   # 0.0 to 1.0
-    emotional_tone: Optional[str] = None  # positive, negative, neutral
+    
+    # === ADR-005: Temporal Fields ===
+    date: Optional[str] = None              # ISO date YYYY-MM-DD
+    time_of_day: Optional[str] = None       # morning, afternoon, evening, night
+    day_of_week: Optional[int] = None       # 0=Monday, 6=Sunday
+    
+    # === ADR-005: Emotional Fields ===
+    emotional_valence: float = 0.0          # -1.0 (negative) to +1.0 (positive)
+    emotional_arousal: float = 0.5          # 0.0 (calm) to 1.0 (excited)
+    primary_emotion: Optional[str] = None   # joy, sadness, fear, anger, surprise, etc.
+    emotional_tone: Optional[str] = None    # Legacy: positive, negative, neutral
+    
+    # === ADR-005: Importance & Decay ===
+    importance: float = 0.5                 # 0.0 to 1.0
+    decay_factor: float = 1.0               # Starts at 1.0, decays over time (Ebbinghaus)
+    
+    # === ADR-005: Access Tracking ===
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     last_accessed: str = field(default_factory=lambda: datetime.now().isoformat())
     access_count: int = 0
+    
+    # === ADR-005: Entity Extraction ===
+    participants: List[str] = field(default_factory=list)  # Extracted people/entities
+    topics: List[str] = field(default_factory=list)        # Extracted topics
+    related_entities: List[str] = field(default_factory=list)  # Related entities
+    related_topics: List[str] = field(default_factory=list)    # Related topics
+    
+    # Metadata
     tags: List[str] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
+    source: Optional[str] = None            # conversation, insight, import, etc.
+    session_id: Optional[str] = None        # Session that created this memory
+    verified: bool = False                  # Has been verified/reviewed
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization (ADR-005 schema v2.0)."""
         return {
+            # Core
             "id": self.id,
             "memory_type": self.memory_type.value,
             "title": self.title,
             "content": self.content,
-            "importance": self.importance,
+            "embedding_text": self.embedding_text,
+            # Temporal
+            "date": self.date,
+            "time_of_day": self.time_of_day,
+            "day_of_week": self.day_of_week,
+            # Emotional
+            "emotional_valence": self.emotional_valence,
+            "emotional_arousal": self.emotional_arousal,
+            "primary_emotion": self.primary_emotion,
             "emotional_tone": self.emotional_tone,
+            # Importance & Decay
+            "importance": self.importance,
+            "decay_factor": self.decay_factor,
+            # Access Tracking
             "created_at": self.created_at,
+            "last_accessed": self.last_accessed,
             "access_count": self.access_count,
+            # Entities
+            "participants": self.participants,
+            "topics": self.topics,
+            "related_entities": self.related_entities,
+            "related_topics": self.related_topics,
+            # Metadata
             "tags": self.tags,
             "metadata": self.metadata,
+            "source": self.source,
+            "session_id": self.session_id,
+            "verified": self.verified,
         }
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "MemoryBlock":
-        """Create from dictionary."""
+        """Create from dictionary (ADR-005 schema v2.0)."""
         return cls(
+            # Core
             id=data.get("id", str(uuid.uuid4())),
             memory_type=MemoryType(data.get("memory_type", "episodic")),
             title=data.get("title", ""),
             content=data.get("content", ""),
-            importance=data.get("importance", 0.5),
+            embedding_text=data.get("embedding_text", ""),
+            # Temporal
+            date=data.get("date"),
+            time_of_day=data.get("time_of_day"),
+            day_of_week=data.get("day_of_week"),
+            # Emotional
+            emotional_valence=data.get("emotional_valence", 0.0),
+            emotional_arousal=data.get("emotional_arousal", 0.5),
+            primary_emotion=data.get("primary_emotion"),
             emotional_tone=data.get("emotional_tone"),
+            # Importance & Decay
+            importance=data.get("importance", 0.5),
+            decay_factor=data.get("decay_factor", 1.0),
+            # Access Tracking
             created_at=data.get("created_at", datetime.now().isoformat()),
+            last_accessed=data.get("last_accessed", datetime.now().isoformat()),
             access_count=data.get("access_count", 0),
+            # Entities
+            participants=data.get("participants", []),
+            topics=data.get("topics", []),
+            related_entities=data.get("related_entities", []),
+            related_topics=data.get("related_topics", []),
+            # Metadata
             tags=data.get("tags", []),
             metadata=data.get("metadata", {}),
+            source=data.get("source"),
+            session_id=data.get("session_id"),
+            verified=data.get("verified", False),
         )
 
 
@@ -94,7 +173,7 @@ class MemoryBlock:
 class EpisodicMemoryBlock(MemoryBlock):
     """Memory block for episodic memory (events, conversations)."""
     event_type: str = "conversation"  # conversation, insight, decision, interaction
-    participants: List[str] = field(default_factory=list)
+    # Note: participants is now in parent MemoryBlock (ADR-005)
     context: str = ""
     outcome: Optional[str] = None
     lessons_learned: List[str] = field(default_factory=list)
@@ -109,9 +188,8 @@ class SemanticMemoryBlock(MemoryBlock):
     """Memory block for semantic memory (facts, knowledge)."""
     concept_category: str = "general"  # fact, preference, relationship, skill
     confidence: float = 0.8  # How confident we are about this knowledge
-    source: Optional[str] = None  # Where this knowledge came from
+    # Note: source, verified are now in parent MemoryBlock (ADR-005)
     related_concepts: List[str] = field(default_factory=list)
-    verified: bool = False
     verification_date: Optional[str] = None
     
     def __post_init__(self):

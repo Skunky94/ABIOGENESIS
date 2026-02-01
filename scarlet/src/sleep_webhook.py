@@ -1,8 +1,8 @@
 """
-Sleep-Time Webhook Service for Letta (v2.1.0 - Automatic Memory Retrieval)
+Sleep-Time Webhook Service for Letta (v2.2.0 - ADR-005 Memory Decay)
 
 This service receives webhook calls from Letta after each step completion
-and provides TWO functions:
+and provides THREE functions:
 
 1. AUTOMATIC MEMORY RETRIEVAL (every message):
    - Fetches last user message
@@ -15,6 +15,11 @@ and provides TWO functions:
    - Triggers sleep agent for deep analysis
    - Stores insights to Qdrant (episodic, semantic, procedural, emotional)
 
+3. MEMORY DECAY (ADR-005, background task):
+   - Ebbinghaus forgetting curve for natural memory decay
+   - Decay slowed by: high importance, emotional intensity, frequent access
+   - Runs every hour (configurable via DECAY_INTERVAL_HOURS)
+
 Architecture:
 1. Letta calls webhook after each step (STEP_COMPLETE_WEBHOOK)
 2. This service ALWAYS performs memory retrieval (no LLM, $0 cost)
@@ -22,6 +27,7 @@ Architecture:
 4. After threshold (default: 5), triggers sleep agent consolidation
 5. Sleep agent analyzes conversation and returns JSON insights
 6. Insights are stored in Qdrant
+7. Background task periodically updates decay_factor
 
 Environment Variables:
 - LETTA_URL: Letta server URL (default: http://localhost:8283)
@@ -31,15 +37,9 @@ Environment Variables:
 - RETRIEVAL_ENABLED: Enable auto retrieval (default: true)
 - RETRIEVAL_LIMIT: Max memories per collection (default: 3)
 - RETRIEVAL_THRESHOLD: Min similarity score (default: 0.5)
+- DECAY_INTERVAL_HOURS: Hours between decay cycles (default: 1)
 
-Usage:
-1. Start this service: python sleep_webhook.py
-2. Configure Letta: STEP_COMPLETE_WEBHOOK=http://localhost:8284/webhooks/step-complete
-3. Messages are automatically counted
-4. Memory retrieval happens on EVERY message
-5. Sleep consolidation triggers at threshold with Qdrant storage
-
-Version: 2.1.0
+Version: 2.2.0
 Author: ABIOGENESIS Team
 Date: 2026-02-01
 """
@@ -82,6 +82,15 @@ except ImportError as e:
     logger.warning(f"[Sleep-Webhook] Memory system not available: {e}")
     MEMORY_AVAILABLE = False
 
+# Import ADR-005 decay system
+try:
+    from memory.memory_decay import get_decay_manager, run_decay_cycle
+    DECAY_AVAILABLE = True
+    logger.info("[Sleep-Webhook] Decay system available")
+except ImportError as e:
+    logger.warning(f"[Sleep-Webhook] Decay system not available: {e}")
+    DECAY_AVAILABLE = False
+
 # Configuration
 LETTA_URL = os.getenv("LETTA_URL", "http://localhost:8283")
 SLEEP_THRESHOLD = int(os.getenv("SLEEP_THRESHOLD", "5"))
@@ -100,7 +109,7 @@ QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
 PRIMARY_AGENT_ID = "agent-ac26cf86-3890-40a9-a70f-967f05115da9"
 SLEEP_AGENT_ID = "agent-3dd9a54f-dc55-4d7f-adc3-d5cbb1aca950"
 
-app = FastAPI(title="Sleep-Time Webhook Service v2.1")
+app = FastAPI(title="Sleep-Time Webhook Service v2.2")
 
 # In-memory message counter per conversation
 conversation_counters: Dict[str, int] = {}
@@ -881,10 +890,182 @@ async def reset_counter(conversation_id: str):
     conversation_counters[conversation_id] = 0
     return {"status": "reset", "conversation_id": conversation_id}
 
+
+# ==============================================================================
+# ADR-005: CONSCIOUS RETRIEVAL TOOL ENDPOINT (Phase 6)
+# ==============================================================================
+
+class RememberRequest(BaseModel):
+    """Request body for remember tool endpoint."""
+    query: str
+    memory_types: Optional[List[str]] = None
+    limit: int = 5
+
+
+@app.post("/tools/remember")
+async def tool_remember(request: RememberRequest):
+    """
+    Endpoint for the 'remember' Letta tool.
+    
+    Allows Scarlet to perform conscious memory retrieval.
+    Uses full ADR-005 pipeline: Query Analyzer + Multi-Strategy + Ranking.
+    """
+    try:
+        # ADR-005: Use smart search
+        try:
+            from memory.memory_retriever import MemoryRetriever
+            retriever = MemoryRetriever()
+            
+            results, metadata = retriever.smart_search(
+                query=request.query,
+                query_vector=None,  # Will generate embedding internally
+                limit=request.limit,
+                collections=request.memory_types
+            )
+            
+            if not results:
+                return {"result": f"[Nessun ricordo trovato per: {request.query}]"}
+            
+            # Format results
+            lines = []
+            intent = metadata.get("intent", "generale")
+            strategy = metadata.get("strategy", "semantica")
+            lines.append(f"## Ricordi rilevanti per: \"{request.query}\"")
+            lines.append(f"(Intent: {intent}, Strategia: {strategy})")
+            lines.append("")
+            
+            for i, result in enumerate(results, 1):
+                payload = result.get("payload", {})
+                score = result.get("score", 0)
+                collection = result.get("collection", "sconosciuta")
+                
+                title = payload.get("title", "Senza titolo")
+                content = payload.get("content", payload.get("text", ""))
+                date = payload.get("date", "")
+                importance = payload.get("importance", 0.5)
+                emotion = payload.get("primary_emotion", "")
+                
+                lines.append(f"### {i}. {title}")
+                lines.append(f"**Tipo**: {collection} | **Rilevanza**: {score:.2f}")
+                
+                if date:
+                    lines.append(f"**Data**: {date}")
+                if emotion:
+                    lines.append(f"**Emozione**: {emotion}")
+                
+                if len(content) > 500:
+                    content = content[:500] + "..."
+                lines.append(f"\n{content}")
+                lines.append("")
+            
+            return {"result": "\n".join(lines), "metadata": metadata}
+            
+        except ImportError as e:
+            logger.warning(f"[Remember] ADR-005 modules not available: {e}")
+            return {"result": "[Sistema di memoria non disponibile]", "error": str(e)}
+            
+    except Exception as e:
+        logger.error(f"[Remember] Error: {e}")
+        return {"result": f"[Errore: {e}]", "error": str(e)}
+
+
+# ==============================================================================
+# ADR-005: MEMORY DECAY ENDPOINTS
+# ==============================================================================
+
+@app.post("/decay/run")
+async def trigger_decay_cycle():
+    """
+    Manually trigger memory decay cycle.
+    
+    Updates decay_factor for all memories based on Ebbinghaus curve.
+    """
+    if not DECAY_AVAILABLE:
+        return {"error": "Decay system not available"}
+    
+    try:
+        stats = run_decay_cycle()
+        logger.info(f"[Decay] Manual cycle completed: {stats}")
+        return {"status": "completed", "stats": stats}
+    except Exception as e:
+        logger.error(f"[Decay] Cycle failed: {e}")
+        return {"status": "error", "error": str(e)}
+
+
+@app.get("/decay/status")
+async def get_decay_status():
+    """Get decay system status."""
+    if not DECAY_AVAILABLE:
+        return {"available": False}
+    
+    try:
+        decay_manager = get_decay_manager()
+        return {
+            "available": True,
+            "params": {
+                "base_half_life_hours": decay_manager.params.base_half_life_hours,
+                "importance_multiplier": decay_manager.params.importance_multiplier,
+                "emotional_multiplier": decay_manager.params.emotional_multiplier,
+                "min_decay_factor": decay_manager.params.min_decay_factor
+            }
+        }
+    except Exception as e:
+        return {"available": False, "error": str(e)}
+
+
+# Background decay task
+_decay_task: Optional[asyncio.Task] = None
+DECAY_INTERVAL_HOURS = int(os.getenv("DECAY_INTERVAL_HOURS", "1"))
+
+
+async def decay_background_task():
+    """
+    Background task that runs decay cycle periodically.
+    
+    Default: every hour
+    """
+    interval_seconds = DECAY_INTERVAL_HOURS * 3600
+    logger.info(f"[Decay] Background task started (interval: {DECAY_INTERVAL_HOURS}h)")
+    
+    while True:
+        await asyncio.sleep(interval_seconds)
+        
+        if DECAY_AVAILABLE:
+            try:
+                stats = run_decay_cycle()
+                logger.info(f"[Decay] Background cycle: {stats['points_updated']} updated, {stats['errors']} errors")
+            except Exception as e:
+                logger.error(f"[Decay] Background cycle failed: {e}")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Start background tasks on app startup."""
+    global _decay_task
+    
+    if DECAY_AVAILABLE:
+        _decay_task = asyncio.create_task(decay_background_task())
+        logger.info("[Decay] Background decay task scheduled")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cancel background tasks on shutdown."""
+    global _decay_task
+    
+    if _decay_task:
+        _decay_task.cancel()
+        try:
+            await _decay_task
+        except asyncio.CancelledError:
+            pass
+        logger.info("[Decay] Background task stopped")
+
+
 def main():
     """Run the webhook service."""
     logger.info("=" * 60)
-    logger.info("Sleep-Time Webhook Service v2.1 Starting...")
+    logger.info("Sleep-Time Webhook Service v2.2 Starting...")
     logger.info("=" * 60)
     logger.info(f"Letta URL: {LETTA_URL}")
     logger.info(f"Sleep Threshold: {SLEEP_THRESHOLD} messages")
@@ -898,6 +1079,10 @@ def main():
     logger.info(f"  Score threshold: {RETRIEVAL_THRESHOLD}")
     logger.info(f"  Ollama URL: {OLLAMA_URL}")
     logger.info(f"  Qdrant: {QDRANT_HOST}:{QDRANT_PORT}")
+    logger.info("-" * 60)
+    logger.info("ADR-005 MEMORY DECAY:")
+    logger.info(f"  Available: {DECAY_AVAILABLE}")
+    logger.info(f"  Interval: {DECAY_INTERVAL_HOURS} hours")
     logger.info("=" * 60)
     
     import uvicorn

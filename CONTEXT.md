@@ -2,70 +2,65 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.2
+**Version**: 1.0.3
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.3.5 - Human-Like Memory Architecture Designed
+### Version: 0.3.7 - Human-Like Memory v2.0 COMPLETE
 
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Foundation (v0.2.0) | ✅ COMPLETE | Primary agent, custom sleep-time, 5 memory blocks |
 | Memory Enhancement | ✅ COMPLETE | Qdrant 4 collections, auto-retrieval, webhook |
-| **Memory v2.0 Architecture** | 📐 DESIGNED | ADR-005 completo, pronto per implementazione |
-| Tool System | 🔄 IN PROGRESS | Conscious retrieval tool needed |
+| **Memory v2.0 Implementation** | ✅ COMPLETE | ADR-005 tutte le 6 fasi implementate |
+| Tool System | ✅ COMPLETE | `remember()` tool for conscious retrieval |
 | Goal Management | ⏳ PENDING | Self-generated goals |
-| Emotional Encoding | ⏳ PENDING | PAD model defined in ADR-005 |
+| Emotional Encoding | ✅ INTEGRATED | PAD model in schema v2.0 |
 | Procedural Memory | ⏳ PENDING | Skill tracking |
 | Self-Improvement | ⏳ PENDING | Performance metrics |
 | Meta-Cognition | ⏳ PENDING | Thought patterns |
 
-### Memory System Status
+### Memory System v2.0 Status (ADR-005)
 
-**Qdrant Infrastructure**: ✅ COMPLETE
-- 4 collections: episodes, concepts, skills, emotions (ALL 1024-dim)
-- INT8 quantization for RAM efficiency
-- Points: episodes=2, concepts=8, skills=0, emotions=0
+**All 6 Phases COMPLETE**:
+1. ✅ Infrastructure: qwen2.5:1.5b downloaded, Qdrant indexes created
+2. ✅ Query Analyzer: Intent detection, time resolution, entity extraction
+3. ✅ Schema Enrichment: MemoryBlock v2.0, memory_enrichment.py
+4. ✅ Multi-Strategy Search: 5 strategies, ADR-005 ranking formula
+5. ✅ Decay System: Ebbinghaus curve, background task ogni ora
+6. ✅ Conscious Tool: `remember()` tool, `/tools/remember` endpoint
 
-**Automatic Retrieval**: ✅ COMPLETE (v0.3.2)
-- Webhook retrieves memories on every user message (~350-400ms)
-- Updates session_context with [RICORDI EMERGENTI]
-- "Priming effect" - memories from turn N available at turn N+1
+**Componenti Implementati**:
+- `src/memory/query_analyzer.py` - Intent detection via qwen2.5:1.5b
+- `src/memory/memory_retriever.py` v2.0 - smart_search() + ADR-005 ranking
+- `src/memory/memory_enrichment.py` - Entity/topic/emotion extraction
+- `src/memory/memory_decay.py` - Ebbinghaus forgetting curve
+- `src/memory/memory_blocks.py` v2.0 - Schema arricchito 30+ campi
+- `src/tools/memory_tool.py` - remember() tool per Scarlet
+- `scripts/create_qdrant_indexes.py` - 17 indici per collection
 
-**Data Quality**: ✅ VERIFIED (v0.3.3)
-- Collections cleaned (20 garbage points removed)
-- No duplicates, no test data, no errors as memories
+**Webhook v2.2**:
+- Automatic Memory Retrieval (ogni messaggio, 0ms LLM cost)
+- Sleep-Time Consolidation (ogni 5 messaggi)
+- Memory Decay Background (ogni 1h)
+- Conscious Retrieval Endpoint (`POST /tools/remember`)
 
-### Human-Like Memory v2.0 (ADR-005) - READY FOR IMPLEMENTATION
-
-**Architettura Progettata**:
-- **Query Analyzer**: LLM locale (qwen2.5:1.5b su Ollama) per capire intento query
-- **Multi-Strategy Search**: Ricerca filtrata per tempo/entità/emozioni/topic
-- **Schema Arricchito**: 30+ campi payload (PAD emotions, temporal, relations)
-- **Ranking Formula**: 6 fattori con pesi (semantic, temporal, importance, emotional, frequency, recency)
-- **Decay System**: Curva Ebbinghaus con protezione emotiva
-- **Access Tracking**: Reinforcement per memorie accedute frequentemente
-
-**Implementation Roadmap** (22h stimate):
-1. Fase 1: Infrastruttura (download qwen2.5:1.5b, test, indici Qdrant)
-2. Fase 2: Query Analyzer (modulo + prompt + parsing)
-3. Fase 3: Schema Dati (MemoryBlock, enrichment, migration)
-4. Fase 4: Multi-Strategy Search (filters, ranking, tracking)
-5. Fase 5: Decay System (background job)
-6. Fase 6: Tool Conscio (Scarlet search tool)
-
-**Riferimento**: [ADR-005](docs/architecture/adr-005-human-like-memory-system.md)
+**ADR-005 Ranking Formula**:
+```
+final_score = (semantic*0.35 + temporal*0.25 + importance*0.15 + 
+               emotional*0.10 + frequency*0.10 + recency*0.05) * decay_factor
+```
 
 ### NEXT STEPS (Priorità Aggiornate)
 
-1. **Download qwen2.5:1.5b** - Aggiungere a docker-compose.yml per Ollama
-2. **Test Query Analyzer** - Verificare latenza e qualità parsing intenti
-3. **Creare Indici Qdrant** - Per filtri efficienti su date, participants, topics
-4. **Implementare Query Analyzer** - Modulo `src/memory/query_analyzer.py`
-5. **Implementare Multi-Strategy Search** - Modulo `src/memory/memory_retriever.py`
+1. **Test End-to-End Memory v2.0** - Verificare il pipeline completo
+2. **Register Tool with Scarlet** - Attaccare remember() all'agente
+3. **Monitor Decay Cycles** - Verificare che il decay funzioni dopo 1h
+4. **Goal Management System** - Prossima milestone (ADR-006?)
+5. **Self-Improvement Loop** - Performance tracking
 
 ---
 

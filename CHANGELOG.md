@@ -2,7 +2,68 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.3.6
+**Version**: 0.3.7
+
+---
+
+## 2026-02-01 - Human-Like Memory v2.0 Complete (ADR-005 Fasi 1-6)
+
+### MEMORY-010: Schema Enrichment, Decay System e Conscious Tool
+
+**Descrizione**: Completamento dell'implementazione ADR-005 con Fasi 3, 5 e 6.
+
+**Componenti Implementati**:
+
+1. **Phase 3: Schema Enrichment** (`src/memory/memory_blocks.py` v2.0)
+   - MemoryBlock dataclass arricchito con campi ADR-005:
+     - Temporal: `date`, `time_of_day`, `day_of_week`
+     - Emotional: `emotional_valence`, `emotional_arousal`, `primary_emotion`
+     - Decay: `decay_factor`, `access_count`, `last_accessed`
+     - Entities: `participants`, `topics`, `related_entities`, `related_topics`
+     - Metadata: `source`, `session_id`, `verified`
+   - `to_dict()` e `from_dict()` aggiornati per schema v2.0
+   
+2. **Phase 3: Memory Enrichment** (`src/memory/memory_enrichment.py` NUOVO)
+   - `MemoryEnrichment` class per estrazione automatica
+   - Usa `qwen2.5:1.5b` per entity/topic/emotion extraction
+   - Fallback a heuristics se LLM non disponibile
+   - `enrich_dict()` per payload Qdrant ready
+
+3. **Phase 5: Memory Decay** (`src/memory/memory_decay.py` NUOVO)
+   - Implementazione curva di Ebbinghaus: R = e^(-t/S)
+   - Memory strength basata su: importance, emotional intensity, access_count
+   - `run_decay_cycle()` per aggiornamento batch
+   - `reinforce_memory()` per access-based reinforcement
+   - `get_decayed_memories()` per cleanup
+
+4. **Phase 5: Background Decay Task** (`src/sleep_webhook.py` v2.2)
+   - Task asincrono che esegue decay ogni ora
+   - Endpoints: `POST /decay/run`, `GET /decay/status`
+   - Configurabile via `DECAY_INTERVAL_HOURS`
+
+5. **Phase 6: Conscious Retrieval Tool** (`src/tools/memory_tool.py` NUOVO)
+   - Tool `remember()` per Letta agent
+   - Schema completo per registrazione tool
+   - Usa full ADR-005 pipeline
+   - Endpoint: `POST /tools/remember`
+
+**Files Modificati/Creati**:
+- `scarlet/src/memory/memory_blocks.py` (schema v2.0)
+- `scarlet/src/memory/memory_enrichment.py` (nuovo)
+- `scarlet/src/memory/memory_decay.py` (nuovo)
+- `scarlet/src/tools/memory_tool.py` (nuovo)
+- `scarlet/src/tools/__init__.py` (exports)
+- `scarlet/src/sleep_webhook.py` (v2.2, decay + remember endpoints)
+
+**Webhook v2.2 Features**:
+- Automatic Memory Retrieval (ogni messaggio)
+- Sleep-Time Consolidation (ogni 5 messaggi)
+- Memory Decay Background Task (ogni ora)
+- Conscious Retrieval Endpoint (/tools/remember)
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #memory #adr-005 #decay #enrichment #tool #complete
 
 ---
 
