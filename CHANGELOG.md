@@ -2,7 +2,7 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development  
 **Entity**: Scarlet  
-**Version**: 0.4.9
+**Version**: 0.4.10
 
 >  **Dettagli completi**: Ogni entry ha un file CNG dedicato in [docs/changelogs/](docs/changelogs/)
 
@@ -12,6 +12,7 @@
 
 | CNG | ID | Change | Descrizione |
 |-----|-----|--------|-------------|
+| [CNG-016](docs/changelogs/cng-016-sleeping-dreaming-clarification.md) | DOCS-012 | **SLEEPING/DREAMING Clarification** | Stati placeholder distinti da Sleep Agent |
 | [CNG-015](docs/changelogs/cng-015-adr-006-continuous-existence.md) | DOCS-011 | **ADR-006 L1 Runtime** | Architettura autonomy-runtime formalizzata |
 | [CNG-014](docs/changelogs/cng-014-spec-004-l1-complete.md) | DOCS-010 | **SPEC-004 L1 Complete** | Layer 1 Continuous Existence spec ready for ADR |
 | [CNG-013](docs/changelogs/cng-013-production-roadmap.md) | DOCS-009 | **Production Roadmap** | Roadmap 8 Layer per release v1.0 |
@@ -34,8 +35,8 @@
 
 | Metrica | Valore |
 |---------|--------|
-| **Versione** | 0.4.9 |
-| **CNG Files** | 15 |
+| **Versione** | 0.4.10 |
+| **CNG Files** | 16 |
 | **Primary Agent** | `agent-505ba047-87ce-425a-b9ba-1d3fac259c62` |
 | **Sleep Agent** | `agent-862e8be2-488a-4213-9778-19b372b5a04e` |
 | **Tool Remember** | `tool-8ddd17d9-35f5-44c4-8ff0-b60db6f581d5` |
@@ -44,7 +45,7 @@
 
 | Tipo | Ultimo ID | Count |
 |------|-----------|-------|
-| DOCS | DOCS-011 | 11 |
+| DOCS | DOCS-012 | 12 |
 | FEATURE | FEATURE-002 | 2 |
 | INFRA | INFRA-002 | 2 |
 | FIX | - | 0 |

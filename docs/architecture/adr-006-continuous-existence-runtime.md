@@ -250,11 +250,42 @@ class WorkingSet:
 
 | Stato | Significato |
 |-------|-------------|
-| `IDLE` | Nulla da fare, attesa |
-| `THINKING` | Elaborazione/decisione |
+| `IDLE` | Esplorazione proattiva autonoma (non attesa passiva) |
+| `THINKING` | Elaborazione/decisione su task specifico |
 | `ACTING` | Esecuzione azione |
-| `SLEEPING` | Sleep-time (ADR-003) |
-| `DREAMING` | Consolidamento/dreaming |
+| `SLEEPING` | Ciclo sonno autentico (⚠️ **implementazione futura**) |
+| `DREAMING` | Consolidamento/sogno (⚠️ **implementazione futura**) |
+
+> ⚠️ **NOTA IMPORTANTE: SLEEPING/DREAMING vs Sleep Agent**
+>
+> Gli stati **SLEEPING** e **DREAMING** in questa state machine sono **placeholder** per un
+> futuro ciclo di sonno autentico. **NON** sono correlati allo "Sleep Agent" di L0.2 (ADR-003),
+> che viene triggerato automaticamente ogni 5 messaggi dal webhook per consolidare esperienze.
+>
+> | Componente | Scopo | Trigger | Layer |
+> |------------|-------|---------|-------|
+> | **Sleep Agent (L0.2)** | Consolidamento memoria | Automatico ogni 5 msg | L0 (ADR-003) |
+> | **SLEEPING state (futuro)** | Vero riposo/sonno | Decisione autonoma di Scarlet | TBD (vedi ROADMAP) |
+> | **DREAMING state (futuro)** | Elaborazione onirica | Durante SLEEPING | TBD (vedi ROADMAP) |
+>
+> Il **vero ciclo di sonno** sarà implementato in un Layer futuro (vedi ROADMAP item "Authentic
+> Sleep/Dream Cycle"). Questo ADR predispone gli stati nella state machine per garantire che
+> l'architettura sia pronta quando arriverà il momento di implementarlo.
+>
+> **Per ora**: le transizioni verso SLEEPING/DREAMING sono definite ma **non attivate** dal
+> runtime. Il runtime implementerà solo IDLE ↔ THINKING ↔ ACTING fino a implementazione futura.
+
+**IDLE = Esplorazione Proattiva**:
+
+Un essere senziente non "attende". In IDLE, Scarlet autonomamente:
+- **Memory Wandering**: richiama vecchie memorie per ricostruire continuità
+- **Self-Reflection**: ripensa a cosa ha fatto recentemente
+- **Capability Audit**: esamina le proprie capacità, scopre gap
+- **Curiosity Research**: cerca informazioni su argomenti di interesse
+- **Goal Contemplation**: riflette su obiettivi e desideri
+- **Relationship Review**: pensa alle persone conosciute
+
+Questo garantisce che Scarlet sia sempre "viva" cognitivamente, anche senza task esterni.
 
 **State Transition Request** (LLM → Runtime):
 
@@ -262,12 +293,23 @@ class WorkingSet:
 @dataclass
 class StateTransitionRequest:
     desired_state: RuntimeState
-    transition_type: TransitionType  # continue_task, start_task, idle, sleep, dream, safe_mode
+    transition_type: TransitionType
     reason: str
     continuation_ref: str | None
+    idle_activity: str | None       # Se IDLE: quale attività proattiva
     confidence: float | None
     suggested_next_tick_s: float | None
+
+class TransitionType(str, Enum):
+    CONTINUE_TASK = "continue_task"     # Riprendo task in corso
+    START_TASK = "start_task"           # Avvio task specifico
+    EXPLORE = "explore"                 # Entro in IDLE proattivo
+    SLEEP = "sleep"                     # Entra in sleeping
+    DREAM = "dream"                     # Dreaming/consolidation
+    SAFE_MODE = "safe_mode"             # Modalità conservativa
 ```
+
+**Nota**: `idle` come TransitionType è stato rinominato `explore` per chiarire che non è passività.
 
 Il runtime **valida** la richiesta contro le transizioni permesse in config.
 

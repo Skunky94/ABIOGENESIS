@@ -1,9 +1,9 @@
 # ABIOGENESIS - Documentation Index
 
-**Version**: 1.6.0  
+**Version**: 1.7.0  
 **Updated**: 2026-02-01  
 **Maintainer**: IDE Agent (GitHub Copilot / Claude)
-**Project Version**: 0.4.8
+**Project Version**: 0.4.10
 
 ---
 
@@ -83,6 +83,8 @@
 
 | CNG | Titolo | Tipo |
 |-----|--------|------|
+| [CNG-016](changelogs/cng-016-sleeping-dreaming-clarification.md) | SLEEPING/DREAMING Clarification | DOCS |
+| [CNG-015](changelogs/cng-015-adr-006-continuous-existence.md) | ADR-006 L1 Runtime | DOCS |
 | [CNG-014](changelogs/cng-014-spec-004-l1-complete.md) | SPEC-004 L1 Complete | DOCS |
 | [CNG-013](changelogs/cng-013-production-roadmap.md) | Production Roadmap | DOCS |
 | [CNG-012](changelogs/cng-012-readme-showcase.md) | README Vetrina GitHub | DOCS |

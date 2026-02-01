@@ -2,14 +2,14 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.15
+**Version**: 1.0.16
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.4.9 - L1 ADR Complete
+### Version: 0.4.10 - SLEEPING/DREAMING Clarification
 
 | Phase | Status | Progress |
 |-------|--------|----------|
@@ -19,7 +19,7 @@
 | Tool System | ✅ COMPLETE | `remember()` tool registrato (ADR-005) |
 | **Documentation Framework** | ✅ COMPLETE | ADR/SPEC/PROC/CNG con formato corretto |
 | **Docker Persistence** | ✅ FIXED | `LETTA_PG_URI` + pgvector configurati |
-| **Changelog System** | ✅ COMPLETE | Nuovo formato CNG (15 files) |
+| **Changelog System** | ✅ COMPLETE | Nuovo formato CNG (16 files) |
 | **Production Roadmap** | ✅ COMPLETE | 8 Layer verso v1.0 (docs/ROADMAP.md) |
 | **L1 Design** | ✅ COMPLETE | SPEC-004 + ADR-006 accepted |
 | **L1 Implementation** | ⏳ PENDING | autonomy-runtime da sviluppare |
@@ -36,7 +36,7 @@
 | L0 | Foundation | ✅ COMPLETE |
 | L1 | Continuous Existence | 🔄 ADR Done, Implementation Pending |
 | L2 | Self-Model | Planned |
-| L3 | Reflection | Planned |
+| L3 | Reflection | Planned (include L3.4 Authentic Sleep) |
 | L4 | Agency | Planned |
 | L5 | Execution | Planned |
 | L6 | Growth | Planned |

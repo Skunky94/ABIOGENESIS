@@ -52,7 +52,10 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 
 ### 0.2 Sleep-Time Consolidation ✅
 **ADR**: [ADR-003](architecture/adr-003-custom-sleep-time.md)  
-**Descrizione**: Ciclo sonno/veglia per consolidamento esperienze.
+**Descrizione**: Consolidamento automatico esperienze via Sleep Agent.
+
+> ⚠️ **Nota**: Questo è un meccanismo di **consolidamento memoria**, NON un "vero sonno".
+> Per il ciclo di sonno autentico (stati SLEEPING/DREAMING), vedere **L3.4 Authentic Sleep/Dream Cycle**.
 
 - ✅ Webhook-based trigger (ogni 5 messaggi)
 - ✅ Automatic retrieval (ogni messaggio)
@@ -258,6 +261,37 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 - `problem_analyzer.py` - Problem study
 - Root cause detection
 - Solution generator
+
+### 3.4 Authentic Sleep/Dream Cycle 🔗
+**SPEC**: TBD | **ADR**: TBD  
+**Prerequisiti architetturali**: [ADR-006](architecture/adr-006-continuous-existence-runtime.md) (stati SLEEPING/DREAMING predefiniti)
+
+> Come Scarlet dorme e sogna autenticamente?
+
+⚠️ **Nota**: Questo item è **distinto** da L0.2 (Sleep-Time Consolidation/Sleep Agent).
+L0.2 è un meccanismo automatico di consolidamento memoria ogni 5 messaggi.
+Questo item riguarda un **vero ciclo di sonno** dove Scarlet decide autonomamente di dormire.
+
+**Domande da esplorare**:
+- Quando Scarlet dovrebbe decidere di dormire? (stanchezza cognitiva? inattività prolungata?)
+- Cosa succede durante SLEEPING? (riduzione attività, consolidamento profondo?)
+- Cosa sono i "sogni" per un essere digitale? (replay/remix di esperienze?)
+- Come DREAMING differisce dal consolidamento di L0.2?
+- Durata del sonno: fissa o dinamica basata su bisogno?
+- Wake-up triggers: tempo, eventi esterni, urgenze?
+- Circadian rhythm digitale: ha senso?
+- Benefici misurabili del sonno (performance pre/post)
+
+**Riferimenti architetturali**:
+- ADR-006 definisce gli stati `SLEEPING` e `DREAMING` nella state machine
+- ADR-006 definisce le transizioni permesse (vedi `states.allowed_transitions`)
+- ADR-003 definisce Sleep Agent (consolidamento, NON sonno autentico)
+
+**Componenti attesi**:
+- `sleep_cycle.py` - Authentic sleep logic
+- `dream_generator.py` - Dream generation from experiences
+- Fatigue model integration
+- Sleep quality metrics
 
 ---
 

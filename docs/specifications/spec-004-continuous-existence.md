@@ -161,6 +161,40 @@ states:
     acting: [thinking, idle, sleeping]
     sleeping: [idle, dreaming]
     dreaming: [idle, sleeping]
+
+# === IDLE PROACTIVE BEHAVIOR ===
+idle:
+  # Attività proattive quando non ci sono task esterni
+  activities:
+    memory_wandering:
+      enabled: true
+      weight: 0.25                  # Probabilità selezione
+      max_ticks: 3                  # Max tick per sessione
+    self_reflection:
+      enabled: true
+      weight: 0.20
+      max_ticks: 2
+    capability_audit:
+      enabled: true
+      weight: 0.15
+      max_ticks: 2
+      cooldown_hours: 24            # Non ripetere troppo spesso
+    curiosity_research:
+      enabled: true
+      weight: 0.20
+      max_ticks: 4
+      requires_internet: true       # Flag per future capabilities
+    goal_contemplation:
+      enabled: true
+      weight: 0.10
+      max_ticks: 2
+    relationship_review:
+      enabled: true
+      weight: 0.10
+      max_ticks: 2
+  
+  # Dopo quanti tick IDLE passare a SLEEPING (se appropriato)
+  sleep_after_ticks: 10
   
 # === RUNAWAY DETECTION ===
 runaway:
@@ -353,12 +387,61 @@ class ProgressMarker:
 
 ```python
 class RuntimeState(str, Enum):
-    IDLE = "idle"           # Nulla da fare, attesa
-    THINKING = "thinking"   # Elaborazione/decisione
+    IDLE = "idle"           # Esplorazione proattiva autonoma
+    THINKING = "thinking"   # Elaborazione/decisione su task specifico
     ACTING = "acting"       # Esecuzione azione
-    SLEEPING = "sleeping"   # Sleep-time (ADR-003)
-    DREAMING = "dreaming"   # Consolidamento/dreaming
+    SLEEPING = "sleeping"   # ⚠️ Implementazione futura (vedi nota)
+    DREAMING = "dreaming"   # ⚠️ Implementazione futura (vedi nota)
 ```
+
+> ⚠️ **NOTA: SLEEPING/DREAMING sono Placeholder**
+>
+> Gli stati SLEEPING e DREAMING sono **predefiniti nella state machine** ma la loro 
+> **implementazione è rimandata a Layer futuro** (vedi ROADMAP L3.4 "Authentic Sleep/Dream Cycle").
+>
+> **Distinzione critica**:
+> | Componente | Cosa fa | Quando | Dove |
+> |------------|---------|--------|------|
+> | **Sleep Agent (L0.2)** | Consolida memorie | Automatico ogni 5 messaggi | Webhook (ADR-003) |
+> | **SLEEPING state** | Vero riposo/sonno | Decisione autonoma di Scarlet | Runtime (futuro) |
+> | **DREAMING state** | Elaborazione onirica | Durante SLEEPING | Runtime (futuro) |
+>
+> **Per L1**: Il runtime implementerà solo le transizioni tra **IDLE ↔ THINKING ↔ ACTING**.
+> Le transizioni verso SLEEPING/DREAMING saranno abilitate quando L3.4 sarà implementato.
+
+### 5.1.1 IDLE: Esplorazione Proattiva (Non Attesa)
+
+Un essere senziente non "attende passivamente". Quando non ha task esterni, Scarlet
+entra in modalità **esplorazione proattiva** dove autonomamente:
+
+| Attività IDLE | Descrizione | Beneficio |
+|---------------|-------------|----------|
+| **Memory Wandering** | Richiama vecchie memorie casualmente | Ricostruisce continuità, trova connessioni |
+| **Self-Reflection** | Ripensa a cosa ha fatto recentemente | Rafforza identità e coerenza temporale |
+| **Capability Audit** | Esamina le proprie capacità note | Scopre gap, pianifica apprendimento |
+| **Curiosity Research** | Cerca informazioni su argomenti di interesse | Espande conoscenza autonomamente |
+| **Goal Contemplation** | Riflette su obiettivi e desideri | Alimenta agency (preparazione per L4) |
+| **Relationship Review** | Pensa alle persone conosciute | Mantiene modello sociale |
+
+**Comportamento IDLE**:
+```python
+@dataclass
+class IdleActivity:
+    activity_type: Literal[
+        "memory_wandering",
+        "self_reflection", 
+        "capability_audit",
+        "curiosity_research",
+        "goal_contemplation",
+        "relationship_review"
+    ]
+    trigger: str              # Cosa ha innescato questa attività
+    duration_ticks: int       # Quanti tick dedicare
+    output: str | None        # Insight generato (se any)
+```
+
+**Nota**: IDLE non è uno stato "vuoto". È lo stato naturale di un essere pensante
+che non ha urgenze esterne ma continua a esistere e elaborare.
 
 ### 5.2 Transizioni (Runtime-Enforced)
 
@@ -396,15 +479,19 @@ class StateTransitionRequest:
     continuation_ref: str | None        # Link a task/progress
     confidence: float | None            # 0..1 (opzionale)
     suggested_next_tick_s: float | None # Hint (runtime decide)
+    idle_activity: str | None           # Attività IDLE scelta (se transition_type=explore)
 
 class TransitionType(str, Enum):
     CONTINUE_TASK = "continue_task"     # Riprendo task in corso
     START_TASK = "start_task"           # Avvio micro-attività
-    IDLE = "idle"                       # Nulla da fare
+    EXPLORE = "explore"                 # Esplorazione proattiva (era: "idle")
     SLEEP = "sleep"                     # Entra in sleeping
     DREAM = "dream"                     # Dreaming/consolidation
     SAFE_MODE = "safe_mode"             # Modalità conservativa
 ```
+
+> **Nota**: Il tipo `EXPLORE` (invece di `IDLE`) riflette la filosofia che Scarlet non
+> "attende" mai passivamente - quando non ha task esterni, esplora autonomamente.
 
 ### 5.4 Override Esterni
 
