@@ -67,6 +67,7 @@
 | [PROC-003](procedures/proc-003-agent-recreation.md) | Agent Recreation (Letta) | Eliminare e ricreare agente | v1.1.0 |
 | [PROC-004](procedures/proc-004-database-backup.md) | Database Backup | Backup PostgreSQL | v1.1.0 |
 | [PROC-005](procedures/proc-005-docker-services-update.md) | Docker Services Update | Aggiornare servizi Docker | v1.1.0 |
+| [PROC-006](procedures/proc-006-letta-tool-registration.md) | Letta Tool Registration | Registrare tool custom con agente | v1.0.0 |
 | [proc-template](procedures/proc-template.md) | Template per nuove PROC | 📄 Template | - |
 
 > ⚠️ **IMPORTANTE**: Prima di eseguire operazioni documentate nelle PROC, consultare SEMPRE la procedura corrispondente per garantire consistenza.

@@ -38,6 +38,32 @@
 
 ---
 
+### DOCS-006: Procedura Registrazione Tool Letta
+
+**Descrizione**: Creata PROC-006 basata sulle lezioni apprese durante la registrazione del tool `remember`.
+
+**Contenuto**:
+- Guida passo-passo per registrare tool custom in Letta
+- Sezione "Lezioni Apprese" con errori comuni e soluzioni
+- Template source code con regole critiche
+- Checklist rapida per verifiche
+- Procedure di rollback
+
+**Errori Documentati**:
+- `tools.create()` non accetta `name` (estratto da source code)
+- API corretta: `agents.tools.list()` non `tools.list_for_agent()`
+- Bug duplicati in Letta quando si fa attach
+- Import devono essere DENTRO la funzione (sandbox)
+
+**Files Creati**:
+- `docs/procedures/proc-006-letta-tool-registration.md`
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #docs #proc #letta #tools
+
+---
+
 ## 2026-02-01 - Documentation Consistency Fix
 
 ### DOCS-005: Allineamento Versioni e Regola Consistency
