@@ -1,9 +1,9 @@
 # ABIOGENESIS - Documentation Index
 
-**Version**: 1.3.0  
+**Version**: 1.4.0  
 **Updated**: 2026-02-01  
 **Maintainer**: IDE Agent (GitHub Copilot / Claude)
-**Project Version**: 0.4.3
+**Project Version**: 0.4.6
 
 ---
 
@@ -14,11 +14,12 @@
 | **Panoramica progetto** | [README.md](../README.md) |
 | **Stato attuale & next steps** | [CONTEXT.md](../CONTEXT.md) |
 | **Cronologia modifiche** | [CHANGELOG.md](../CHANGELOG.md) |
+| **Dettagli changelog** | [docs/changelogs/](changelogs/) (CNG-XXX) |
 | **Decisioni architetturali** | [docs/architecture/](architecture/) (ADR-XXX) |
 | **Specifiche tecniche** | [docs/specifications/](specifications/) (SPEC-XXX) |
 | **Procedure operative** | [docs/procedures/](procedures/) (PROC-XXX) |
 
-> 🚨 **ADR + SPEC + PROC** = Documentazione numerata critica. Consultare SEMPRE prima di implementazioni!
+> 🚨 **ADR + SPEC + PROC + CNG** = Documentazione numerata critica. Consultare SEMPRE prima di implementazioni!
 
 ---
 
@@ -72,6 +73,26 @@
 
 > ⚠️ **IMPORTANTE**: Prima di eseguire operazioni documentate nelle PROC, consultare SEMPRE la procedura corrispondente per garantire consistenza.
 
+### Changelog Entries (/docs/changelogs/)
+
+> **Nota**: I CNG sono file di DETTAGLIO per ogni voce del changelog.
+> Il CHANGELOG.md principale contiene solo un indice snello con link ai CNG.
+
+| CNG | Titolo | Tipo |
+|-----|--------|------|
+| [CNG-011](changelogs/cng-011-changelog-restructure.md) | Ristrutturazione Changelog | DOCS |
+| [CNG-010](changelogs/cng-010-agent-recreation.md) | Ricreazione Agenti | FEATURE |
+| [CNG-009](changelogs/cng-009-pgvector-extension.md) | pgvector Extension | INFRA |
+| [CNG-008](changelogs/cng-008-postgresql-persistence-fix.md) | PostgreSQL Persistence Fix | INFRA |
+| [CNG-007](changelogs/cng-007-remember-tool-registration.md) | Tool Remember | FEATURE |
+| [CNG-006](changelogs/cng-006-proc-tool-registration.md) | PROC-006 Creata | DOCS |
+| [CNG-005](changelogs/cng-005-version-consistency.md) | Version Consistency | DOCS |
+| [CNG-004](changelogs/cng-004-spec-proc-format.md) | SPEC/PROC Format | DOCS |
+| [CNG-003](changelogs/cng-003-numbered-documentation.md) | Numbered Docs | DOCS |
+| [CNG-002](changelogs/cng-002-adr-spec-proc-framework.md) | ADR/SPEC/PROC Framework | DOCS |
+| [CNG-001](changelogs/cng-001-documentation-restructure.md) | Documentation Restructure | DOCS |
+| [cng-template](changelogs/cng-template.md) | Template per nuovi CNG | 📄 Template |
+
 ### Agent Instructions (/.github/)
 
 | File | Target | Scopo |
@@ -87,19 +108,20 @@
 
 | Evento | File da Aggiornare |
 |--------|-------------------|
-| Nuova feature implementata | `CHANGELOG.md` → `CONTEXT.md` |
-| Cambio architetturale | Nuovo ADR → `CHANGELOG.md` → `CONTEXT.md` |
-| Bug fix | `CHANGELOG.md` |
+| Nuova feature implementata | CNG file → `CHANGELOG.md` → `CONTEXT.md` |
+| Cambio architetturale | Nuovo ADR → CNG file → `CHANGELOG.md` → `CONTEXT.md` |
+| Bug fix | CNG file → `CHANGELOG.md` |
 | Cambio stack/tools | `README.md` → `CONTEXT.md` |
 | Fine sessione | Verifica `CONTEXT.md` aggiornato |
 
 ### Ordine di Aggiornamento
 
 ```
-1. CHANGELOG.md     (registra la modifica)
-2. CONTEXT.md       (aggiorna stato attuale)
-3. README.md        (solo se cambia overview)
-4. ADR/Specs        (se decisione architetturale)
+1. docs/changelogs/cng-XXX.md  (dettagli completi)
+2. CHANGELOG.md                (aggiungi riga con link al CNG)
+3. CONTEXT.md                  (aggiorna stato attuale)
+4. README.md                   (solo se cambia overview)
+5. ADR/Specs                   (se decisione architetturale)
 ```
 
 ---
@@ -133,10 +155,10 @@
 
 | Documento | Versione | Data |
 |-----------|----------|------|
-| INDEX.md | 1.2.0 | 2026-02-01 |
-| README.md | 0.3.9 | 2026-02-01 |
-| CONTEXT.md | 1.0.5 | 2026-02-01 |
-| CHANGELOG.md | Current | 2026-02-01 |
+| INDEX.md | 1.4.0 | 2026-02-01 |
+| README.md | 0.4.6 | 2026-02-01 |
+| CONTEXT.md | 1.0.12 | 2026-02-01 |
+| CHANGELOG.md | 0.4.6 | 2026-02-01 |
 | PROJECT_RULES.md | 1.0.0 | 2026-01-31 |
 | copilot-instructions.md | 2.0.0 | 2026-02-01 |
 

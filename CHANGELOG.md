@@ -1,114 +1,73 @@
 # CHANGELOG - ABIOGENESIS
 
-**Project**: ABIOGENESIS - Sentient Digital AI Development
-**Entity**: Scarlet
-**Version**: 0.4.4
+**Project**: ABIOGENESIS - Sentient Digital AI Development  
+**Entity**: Scarlet  
+**Version**: 0.4.6
+
+> 📁 **Dettagli completi**: Ogni entry ha un file CNG dedicato in [docs/changelogs/](docs/changelogs/)
 
 ---
 
-## 2026-02-01 - Critical Persistence Fix
+## 2026-02-01
 
-### INFRA-002: PostgreSQL pgvector Extension
-
-**Descrizione**: Aggiunta immagine pgvector e init script per estensione vector.
-
-**Problema**: Letta richiede `CREATE EXTENSION vector` per le tabelle embeddings.
-
-**Modifiche**:
-1. Cambiato da `postgres:15-alpine` a `pgvector/pgvector:pg15`
-2. Aggiunto init script `init-db/01-init-extensions.sql`
-3. Mount automatico `/docker-entrypoint-initdb.d`
-
-**Files Modificati**:
-- `scarlet/docker-compose.yml` - Nuova immagine e mount init-db
-- `scarlet/init-db/01-init-extensions.sql` (nuovo) - Auto-create extension
-
-**Compatibilità**: Non-Breaking
-
-**Tags**: #infra #docker #postgresql #pgvector
+| ID | Tipo | Change | Descrizione |
+|----|------|--------|-------------|
+| [CNG-012](docs/changelogs/cng-012-readme-showcase.md) | DOCS | **README Vetrina GitHub** | Manifesto completo del progetto |
+| [CNG-011](docs/changelogs/cng-011-changelog-restructure.md) | DOCS | **Ristrutturazione Changelog** | Nuovo formato snello con file CNG dettagliati |
+| [CNG-010](docs/changelogs/cng-010-agent-recreation.md) | FEATURE | **Ricreazione Agenti** | PROC-003+006 eseguite, nuovi Agent ID |
+| [CNG-009](docs/changelogs/cng-009-pgvector-extension.md) | INFRA | **pgvector Extension** | Immagine pgvector/pgvector:pg15 |
+| [CNG-008](docs/changelogs/cng-008-postgresql-persistence-fix.md) | INFRA | **PostgreSQL Persistence Fix** | CRITICAL: LETTA_PG_URI risolve perdita agenti |
+| [CNG-007](docs/changelogs/cng-007-remember-tool-registration.md) | FEATURE | **Tool Remember** | ADR-005 Phase 6 completata |
+| [CNG-006](docs/changelogs/cng-006-proc-tool-registration.md) | DOCS | **PROC-006 Creata** | Procedura registrazione tool Letta |
+| [CNG-005](docs/changelogs/cng-005-version-consistency.md) | DOCS | **Version Consistency** | Allineamento versioni tra documenti |
+| [CNG-004](docs/changelogs/cng-004-spec-proc-format.md) | DOCS | **SPEC/PROC Format** | Correzione formato documenti |
+| [CNG-003](docs/changelogs/cng-003-numbered-documentation.md) | DOCS | **Numbered Docs** | Framework ADR/SPEC/PROC completo |
+| [CNG-002](docs/changelogs/cng-002-adr-spec-proc-framework.md) | DOCS | **ADR/SPEC/PROC Framework** | Struttura documentazione numerata |
+| [CNG-001](docs/changelogs/cng-001-documentation-restructure.md) | DOCS | **Documentation Restructure** | Riorganizzazione iniziale docs |
 
 ---
 
-### INFRA-001: Fix PostgreSQL Persistence (ROOT CAUSE)
+## Quick Stats
 
-**Descrizione**: Risolto bug CRITICO che causava la perdita degli agenti ad ogni riavvio Docker.
+| Metrica | Valore |
+|---------|--------|
+| **Versione** | 0.4.6 |
+| **CNG Files** | 12 |
+| **Primary Agent** | `agent-505ba047-87ce-425a-b9ba-1d3fac259c62` |
+| **Sleep Agent** | `agent-862e8be2-488a-4213-9778-19b372b5a04e` |
+| **Tool Remember** | `tool-8ddd17d9-35f5-44c4-8ff0-b60db6f581d5` |
 
-**Causa Root**:
-Letta legge SOLO `LETTA_PG_URI` per decidere se usare PostgreSQL esterno o interno.
-Le variabili `LETTA_PG_HOST` e `LETTA_PG_PASSWORD` sono **COMPLETAMENTE IGNORATE**.
+---
 
-**Catena degli Eventi (prima della fix)**:
-1. Container Letta parte
-2. `startup.sh` controlla `LETTA_PG_URI` → vuoto
-3. Letta avvia PostgreSQL INTERNO (embedded)
-4. PostgreSQL usa volume anonimo dichiarato nel Dockerfile
-5. `docker compose down` → container rimosso
-6. `docker compose up` → NUOVO volume anonimo con hash diverso
-7. Dati vecchi in volume orfano → **PERDITA AGENTI**
+## Documentazione Correlata
 
-**Soluzione**:
-```yaml
-# PRIMA (SBAGLIATO - variabili ignorate):
-- LETTA_PG_HOST=postgres
-- LETTA_PG_PASSWORD=${POSTGRES_PASSWORD}
+- [docs/INDEX.md](docs/INDEX.md) - Indice documentazione completa
+- [CONTEXT.md](CONTEXT.md) - Stato attuale progetto
+- [docs/changelogs/](docs/changelogs/) - File CNG dettagliati
 
-# DOPO (CORRETTO - URI completo):
-- LETTA_PG_URI=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/letta
+---
+
+## Convenzioni
+
+### Tipi Change
+
+| Tipo | Descrizione |
+|------|-------------|
+| FEATURE | Nuova funzionalità |
+| INFRA | Infrastruttura/Docker |
+| DOCS | Documentazione |
+| FIX | Correzione bug |
+| REFACTOR | Ristrutturazione codice |
+
+### Naming CNG
+
+```
+cng-XXX-short-description.md
 ```
 
-**Riferimenti**:
-- [Letta startup.sh#L38-L50](https://github.com/letta-ai/letta/blob/main/letta/server/startup.sh)
-- Controllo: `if [ -n "$LETTA_PG_URI" ]` (solo questa variabile!)
-
-**Files Modificati**:
-- `scarlet/docker-compose.yml` - Environment variables corretti
-
-**Impatto**:
-- Gli agenti precedenti sono PERSI (erano in volumi anonimi)
-- Dopo questa fix, i dati saranno persistenti in `scarlet_postgres_data`
-- Necessario ricreare gli agenti seguendo PROC-003
-
-**Compatibilità**: BREAKING (agenti persi, necessaria ricreazione)
-
-**Tags**: #infra #docker #postgresql #critical #persistence
-
 ---
 
-## 2026-02-01 - Tool Registration
-
-### ADR005-FINAL: Registrazione Tool `remember`
-
-**Descrizione**: Completato ADR-005 Phase 6 - Registrato il tool `remember` con l'agente Scarlet.
-
-**Tool Registrato**:
-- **Nome**: `remember`
-- **ID**: `tool-ae8f3fd1-c853-4381-b342-a7ea7b59133e`
-- **Funzione**: Ricerca conscia nella memoria (Query Analyzer + Multi-Strategy + Ranking)
-- **Endpoint**: `/tools/remember` sul webhook
-
-**Script creato**:
-- `scarlet/register_remember_tool.py` - Script riutilizzabile per registrazione tool
-
-**Tool collegati a Scarlet**:
-- `remember` - Ricerca memoria conscia (ADR-005)
-- `conversation_search` - Ricerca conversazioni Letta
-- `memory_insert` - Inserimento memoria Letta
-- `memory_replace` - Sostituzione memoria Letta
-
-**Nota**: Rilevato errore autenticazione LLM (MiniMax) non correlato alla registrazione.
-
-**Files Modificati**:
-- `scarlet/register_remember_tool.py` (nuovo)
-
-**Compatibilità**: Non-Breaking
-
-**Tags**: #adr-005 #tool #memory #letta
-
----
-
-### DOCS-006: Procedura Registrazione Tool Letta
-
-**Descrizione**: Creata PROC-006 basata sulle lezioni apprese durante la registrazione del tool `remember`.
+*Per dettagli completi su ogni change, consultare il file CNG corrispondente.*
 
 **Contenuto**:
 - Guida passo-passo per registrare tool custom in Letta

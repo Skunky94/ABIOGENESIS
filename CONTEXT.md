@@ -2,59 +2,68 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.10
+**Version**: 1.0.12
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.4.4 - Persistence Fix
+### Version: 0.4.6 - Changelog Restructured
 
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Foundation (v0.2.0) | ✅ COMPLETE | Primary agent, custom sleep-time, 5 memory blocks |
 | Memory Enhancement | ✅ COMPLETE | Qdrant 4 collections, auto-retrieval, webhook |
 | **Memory v2.0 Implementation** | ✅ COMPLETE | ADR-005 tutte le 6 fasi implementate |
-| Tool System | ⚠️ NEEDS REDO | `remember()` tool perso - rifare registrazione |
-| **Documentation Framework** | ✅ COMPLETE | ADR/SPEC/PROC con formato corretto |
-| **Docker Persistence** | ✅ FIXED | `LETTA_PG_URI` configurato correttamente |
+| Tool System | ✅ COMPLETE | `remember()` tool registrato (ADR-005) |
+| **Documentation Framework** | ✅ COMPLETE | ADR/SPEC/PROC/CNG con formato corretto |
+| **Docker Persistence** | ✅ FIXED | `LETTA_PG_URI` + pgvector configurati |
+| **Changelog System** | ✅ COMPLETE | Nuovo formato CNG (v0.4.6) |
 | Goal Management | ⏳ PENDING | Self-generated goals |
 | Emotional Encoding | ✅ INTEGRATED | PAD model in schema v2.0 |
 | Procedural Memory | ⏳ PENDING | Skill tracking |
 
-### ⚠️ CRITICAL: Agent Lost - Recreation Required
+### Agent IDs (ACTIVE)
+
+```
+Primary:    agent-505ba047-87ce-425a-b9ba-1d3fac259c62
+Sleep:      agent-862e8be2-488a-4213-9778-19b372b5a04e
+```
+
+**Tool IDs**:
+- `remember`: `tool-8ddd17d9-35f5-44c4-8ff0-b60db6f581d5`
+
+### Infrastructure Status
+
+| Service | Status | Note |
+|---------|--------|------|
+| `abiogenesis-letta` | ✅ Healthy | v0.16.4, usa PostgreSQL esterno |
+| `abiogenesis-postgres` | ✅ Healthy | pgvector/pgvector:pg15 |
+| `abiogenesis-redis` | ✅ Healthy | Cache |
+| `abiogenesis-ollama` | ✅ Healthy | BGE-m3, qwen2.5:1.5b |
+| `abiogenesis-qdrant` | ✅ Running | 4 collections |
+| `abiogenesis-sleep-webhook` | ✅ Running | v2.2 |
+
+### Documentation System (v0.4.6)
+
+| Type | Location | Count |
+|------|----------|-------|
+| **ADR** | `docs/architecture/` | 5 + template |
+| **SPEC** | `docs/specifications/` | 3 + template |
+| **PROC** | `docs/procedures/` | 6 + template |
+| **CNG** | `docs/changelogs/` | 11 + template |
+
+> Nuovo sistema CNG: CHANGELOG.md snello con link a file CNG dettagliati.
+
+### Persistence Fix Applied (v0.4.4)
 
 **Problema Risolto**: Docker compose usava variabili ignorate da Letta.
 
-**Causa Root**:
-- `LETTA_PG_HOST` e `LETTA_PG_PASSWORD` sono **IGNORATI** da Letta
-- Solo `LETTA_PG_URI` viene letto per decidere PostgreSQL esterno vs interno
-- Letta usava PostgreSQL interno con volumi anonimi → perdita dati ad ogni restart
-
-**Fix Applicata** (docker-compose.yml):
-```yaml
-- LETTA_PG_URI=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/letta
-```
-
-**Prossimi Passi**:
-1. ✅ Fix docker-compose.yml con `LETTA_PG_URI`
-2. ⏳ `docker compose down` per fermare i servizi
-3. ⏳ `docker compose up -d` per riavviare con la nuova config
-4. ⏳ Verificare che Letta usi PostgreSQL esterno (no postgres interno)
-5. ⏳ Ricreare agenti Scarlet seguendo PROC-003
-6. ⏳ Ri-registrare tool `remember` seguendo PROC-006
-
-### Agent IDs (DA RICREARE)
-
-```
-Primary:    [LOST - da ricreare]
-Sleep:      [LOST - da ricreare]
-```
-
-**Vecchi ID (non più validi)**:
-- Primary: `agent-ac26cf86-3890-40a9-a70f-967f05115da9`
-- Sleep: `agent-3dd9a54f-dc55-4d7f-adc3-d5cbb1aca950`
+**Fix Applicate**:
+1. `LETTA_PG_URI` invece di `LETTA_PG_HOST` + `LETTA_PG_PASSWORD`
+2. Immagine `pgvector/pgvector:pg15` invece di `postgres:15-alpine`
+3. Init script `init-db/01-init-extensions.sql` per auto-create extension
 
 ### Documentation Framework (v0.4.1)
 
