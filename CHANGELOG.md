@@ -2,7 +2,124 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.3.1
+**Version**: 0.3.3
+
+---
+
+## 2026-02-01 - Collection Cleanup & Retrieval Fix
+
+### MEMORY-007: Qdrant Collection Cleanup e Fix Duplicati
+
+**Descrizione**: Pulizia completa delle collections Qdrant e fix del bug che causava duplicati nei `[RICORDI EMERGENTI]`.
+
+**Issues Risolti**:
+
+1. **Duplicati in session_context**: Il regex per sostituire la sezione `[RICORDI EMERGENTI]` non funzionava correttamente. Le memorie venivano APPENDATE invece che SOSTITUITE.
+   
+2. **Dati garbage nelle collections**: Presenti test data, errori salvati come memorie, duplicati.
+
+**Cleanup Collections**:
+| Collection | Prima | Dopo | Rimossi |
+|------------|-------|------|---------|
+| episodes | 9 | 2 | 7 |
+| concepts | 15 | 8 | 7 |
+| skills | 6 | 0 | 6 |
+| **Totale** | **30** | **10** | **20** |
+
+**Dati Rimossi**:
+- Test data (`type: "test"`, titoli vuoti)
+- Errori salvati (`Error getting messages...`)
+- Pattern di test (`Quick test`, `High importance test`)
+- Duplicati (stesso titolo)
+
+**Fix in sleep_webhook.py**:
+```python
+# Prima (buggy):
+pattern = r'\[RICORDI EMERGENTI\].*?(?=\[|$)'
+
+# Dopo (fix):
+pattern = r'\[RICORDI EMERGENTI\].*?(?=Il contesto della sessione|$)'
+```
+
+**Files Modificati/Creati**:
+- `scarlet/src/sleep_webhook.py` - Fix regex sostituzione
+- `scarlet/cleanup_qdrant.py` - Script cleanup collections (NUOVO)
+- `scarlet/test_retrieval.py` - Test retrieval aggiornato (NUOVO)
+
+**Risultati Test**:
+- Retrieval time: ~350-400ms ✅
+- Duplicati: 0 ✅
+- Rumore: 0 ✅
+- Scarlet usa memorie nelle risposte: ✅
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #memory #qdrant #cleanup #bugfix
+
+---
+
+## 2026-02-02 - Automatic Memory Retrieval (Human-Like Priming)
+
+### MEMORY-006: Automatic Memory Retrieval System
+
+**Descrizione**: Implementato sistema di retrieval automatico delle memorie che simula il "priming" umano. Ad ogni messaggio, il sistema recupera automaticamente ricordi rilevanti da Qdrant e li inietta nel session_context, rendendo le memorie disponibili alla prossima risposta.
+
+**Architettura**:
+```
+User Message N → STEP_COMPLETE webhook
+              → Fetch last user message from Letta (~5ms)
+              → Generate embedding via BGE-m3/Ollama (~250ms cold, ~50ms warm)
+              → Search Qdrant collections: episodes, concepts, skills (~10ms)
+              → Update session_context with "[RICORDI EMERGENTI]" section
+              → User Message N+1 vede le memorie (effetto priming)
+```
+
+**Modifiche Principali**:
+
+1. **sleep_webhook.py** (v2.1.0):
+   - `get_last_user_message()` - Recupera ultimo messaggio utente da Letta API
+   - `generate_embedding()` - Genera embedding via Ollama BGE-m3
+   - `search_qdrant_collection()` - Cerca in singola collection Qdrant
+   - `search_all_collections()` - Cerca in parallelo su episodes, concepts, skills
+   - `format_memories_for_context()` - Formatta memorie per session_context
+   - `update_session_context()` - Aggiorna memory block con ricordi emergenti
+   - `perform_automatic_retrieval()` - Orchestratore principale del retrieval
+   - Modificato `handle_step_complete()` per chiamare retrieval ad ogni step
+
+2. **Nuove Variabili Ambiente**:
+   - `RETRIEVAL_ENABLED` - Abilita/disabilita retrieval (default: true)
+   - `RETRIEVAL_LIMIT` - Max memorie per collection (default: 3)
+   - `RETRIEVAL_THRESHOLD` - Score minimo similarità (default: 0.5)
+
+**Formato session_context**:
+```
+[RICORDI EMERGENTI] (aggiornato: HH:MM:SS)
+• [EPISODIO] Titolo: contenuto troncato...
+• [CONCETTO] Titolo: contenuto troncato...
+• [ABILITÀ] Titolo: contenuto troncato...
+
+[contenuto precedente]
+```
+
+**Test Results**:
+- ✓ Webhook riceve STEP_COMPLETE da Letta
+- ✓ Messaggio utente recuperato correttamente (message_type: user_message)
+- ✓ Embedding generato via Ollama (~250-400ms)
+- ✓ Ricerca Qdrant funzionante (3-4 memorie trovate)
+- ✓ session_context aggiornato con RICORDI EMERGENTI
+- ✓ Performance: ~450-870ms totale per retrieval
+
+**Note Tecniche**:
+- Collection `emotions` skippata (usa 512-dim vs 1024-dim BGE-m3)
+- No LLM involvement = $0 costo per retrieval
+- Retrieval avviene solo per PRIMARY_AGENT_ID (non sleep agent)
+
+**Files Modificati**:
+- `scarlet/src/sleep_webhook.py` - Major update, +250 righe
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #memory #retrieval #priming #webhook #qdrant
 
 ---
 
