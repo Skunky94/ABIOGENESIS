@@ -23,7 +23,7 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 | Layer | Nome | Status | Progress |
 |-------|------|--------|----------|
 | L0 | Foundation | ✅ COMPLETE | 100% |
-| L1 | Continuous Existence | 🔄 IN PROGRESS | 50% |
+| L1 | Continuous Existence | 🔄 IN PROGRESS | 75% |
 | L2 | Self-Model | ⏳ PENDING | 0% |
 | L3 | Reflection | ⏳ PENDING | 0% |
 | L4 | Agency | ⏳ PENDING | 0% |
@@ -76,7 +76,7 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 **Obiettivo**: Scarlet esiste e opera senza bisogno di trigger umani.
 
 ### 1.1 Autonomous Loop
-**SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: ADR-006 (pending)
+**SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: [ADR-006](architecture/adr-006-continuous-existence-runtime.md) ✅
 
 > Come Scarlet vive continuamente senza input esterni?
 
@@ -95,7 +95,7 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 - `scarlet/config/runtime.yaml` - Config file
 
 ### 1.2 Performance Monitor
-**SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: ADR-006 (pending)
+**SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: [ADR-006](architecture/adr-006-continuous-existence-runtime.md) ✅
 
 > Come Scarlet sa se sta funzionando correttamente?
 
@@ -112,7 +112,7 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 - `scarlet/src/runtime/runaway.py` - Runaway detection
 
 ### 1.3 Error Detection & Resilience
-**SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: ADR-006 (pending)
+**SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: [ADR-006](architecture/adr-006-continuous-existence-runtime.md) ✅
 
 > Come Scarlet rileva e gestisce i propri errori?
 

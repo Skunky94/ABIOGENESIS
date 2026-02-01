@@ -2,14 +2,14 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.14
+**Version**: 1.0.15
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.4.8 - L1 SPEC Complete
+### Version: 0.4.9 - L1 ADR Complete
 
 | Phase | Status | Progress |
 |-------|--------|----------|
@@ -19,9 +19,10 @@
 | Tool System | ✅ COMPLETE | `remember()` tool registrato (ADR-005) |
 | **Documentation Framework** | ✅ COMPLETE | ADR/SPEC/PROC/CNG con formato corretto |
 | **Docker Persistence** | ✅ FIXED | `LETTA_PG_URI` + pgvector configurati |
-| **Changelog System** | ✅ COMPLETE | Nuovo formato CNG (13 files) |
+| **Changelog System** | ✅ COMPLETE | Nuovo formato CNG (15 files) |
 | **Production Roadmap** | ✅ COMPLETE | 8 Layer verso v1.0 (docs/ROADMAP.md) |
-| **L1 SPEC** | ✅ COMPLETE | SPEC-004 ready for ADR-006 |
+| **L1 Design** | ✅ COMPLETE | SPEC-004 + ADR-006 accepted |
+| **L1 Implementation** | ⏳ PENDING | autonomy-runtime da sviluppare |
 | Goal Management | ⏳ PENDING | Self-generated goals (Roadmap L4) |
 | Emotional Encoding | ✅ INTEGRATED | PAD model in schema v2.0 |
 | Procedural Memory | ⏳ PENDING | Skill tracking (Roadmap L6) |
@@ -33,7 +34,7 @@
 | Layer | Focus | Status |
 |-------|-------|--------|
 | L0 | Foundation | ✅ COMPLETE |
-| L1 | Continuous Existence | 🔄 SPEC Done, ADR Pending |
+| L1 | Continuous Existence | 🔄 ADR Done, Implementation Pending |
 | L2 | Self-Model | Planned |
 | L3 | Reflection | Planned |
 | L4 | Agency | Planned |
@@ -44,17 +45,18 @@
 
 **Full details**: [docs/ROADMAP.md](docs/ROADMAP.md)
 
-### L1 Key Decisions (SPEC-004)
+### L1 Architecture (ADR-006)
 
-| Decisione | Scelta |
-|-----------|--------|
-| Architettura | Servizio dedicato `autonomy-runtime` |
-| Configurazione | File YAML unico `scarlet/config/runtime.yaml` |
-| Storage hot | Redis (Working Set, Budget, State) |
-| Storage cold | Qdrant (Learning Events, Error Journal) |
-| Budget MiniMax | 5000 req/5h rolling window, throttle |
-| Runaway | Score multi-fattore, configurable |
-| Learning | Learning Event → futuro Learning Agent (L3.2) |
+| Componente | Decisione |
+|------------|-----------|
+| Servizio | `autonomy-runtime` (container dedicato) |
+| Config | `scarlet/config/runtime.yaml` |
+| State Machine | IDLE → THINKING → ACTING → SLEEPING → DREAMING |
+| Budget | Redis rolling window 5000/5h |
+| Runaway | Score multi-fattore + Learning Events |
+| Storage | Redis (hot) + Qdrant (cold) |
+
+**Implementation Plan**: 4 settimane (vedi ADR-006 §Implementation Plan)
 
 ### Agent IDs (ACTIVE)
 

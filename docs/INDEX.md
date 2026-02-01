@@ -1,9 +1,9 @@
 # ABIOGENESIS - Documentation Index
 
-**Version**: 1.5.0  
+**Version**: 1.6.0  
 **Updated**: 2026-02-01  
 **Maintainer**: IDE Agent (GitHub Copilot / Claude)
-**Project Version**: 0.4.7
+**Project Version**: 0.4.8
 
 ---
 
@@ -44,6 +44,7 @@
 | [ADR-003](architecture/adr-003-custom-sleep-time.md) | Custom Sleep-Time System | ✅ Accepted |
 | [ADR-004](architecture/adr-004-memory-qdrant-adoption.md) | Qdrant Memory System | ✅ Accepted |
 | [ADR-005](architecture/adr-005-human-like-memory-system.md) | Human-Like Memory v2.0 | ✅ Implemented |
+| [ADR-006](architecture/adr-006-continuous-existence-runtime.md) | Continuous Existence Runtime | ✅ Accepted |
 
 ### Technical Specifications (/docs/specifications/)
 
@@ -55,6 +56,7 @@
 | [SPEC-001](specifications/spec-001-memory-system-architecture.md) | Memory System Architecture | ✅ Accepted → ADR-005 |
 | [SPEC-002](specifications/spec-002-human-to-scarlet-mapping.md) | Mappatura Cognitiva Umano-Scarlet | 📚 Analisi di Ricerca |
 | [SPEC-003](specifications/spec-003-architectural-review.md) | Architectural Review | 📚 Analisi Esplorativa |
+| [SPEC-004](specifications/spec-004-continuous-existence.md) | Continuous Existence (L1) | ✅ Accepted → ADR-006 |
 | [spec-template](specifications/spec-template.md) | Template per nuove SPEC | 📄 Template |
 
 ### Procedures (/docs/procedures/)
@@ -81,6 +83,7 @@
 
 | CNG | Titolo | Tipo |
 |-----|--------|------|
+| [CNG-014](changelogs/cng-014-spec-004-l1-complete.md) | SPEC-004 L1 Complete | DOCS |
 | [CNG-013](changelogs/cng-013-production-roadmap.md) | Production Roadmap | DOCS |
 | [CNG-012](changelogs/cng-012-readme-showcase.md) | README Vetrina GitHub | DOCS |
 | [CNG-011](changelogs/cng-011-changelog-restructure.md) | Ristrutturazione Changelog | DOCS |
