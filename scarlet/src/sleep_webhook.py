@@ -371,7 +371,7 @@ async def perform_automatic_retrieval(agent_id: str) -> Dict[str, Any]:
     Perform automatic memory retrieval for an agent.
     
     This is the main entry point called on every STEP_COMPLETE.
-    Embedding-only, no LLM needed, ~45ms total.
+    ADR-005: Now uses Query Analyzer + Multi-Strategy Search.
     
     Returns:
         Dict with retrieval stats and status.
@@ -383,7 +383,9 @@ async def perform_automatic_retrieval(agent_id: str) -> Dict[str, Any]:
         "embedding_generated": False,
         "memories_found": 0,
         "context_updated": False,
-        "duration_ms": 0
+        "duration_ms": 0,
+        "strategy": "pure_semantic",  # ADR-005
+        "intent": None,               # ADR-005
     }
     
     try:
@@ -395,44 +397,68 @@ async def perform_automatic_retrieval(agent_id: str) -> Dict[str, Any]:
         stats["message_found"] = True
         logger.debug(f"[Retrieval] Message: {message[:50]}...")
         
-        # 2. Generate embedding
+        # 2. Generate embedding (needed for all strategies)
         embedding = await generate_embedding(message)
         if not embedding:
             logger.warning("[Retrieval] Failed to generate embedding")
             return stats
         stats["embedding_generated"] = True
         
-        # 3. Search all collections
-        memories = await search_all_collections(
-            vector=embedding,
-            limit=RETRIEVAL_LIMIT,
-            score_threshold=RETRIEVAL_THRESHOLD
-        )
-        
-        # Count total memories found
-        total = sum(len(v) for v in memories.values())
-        stats["memories_found"] = total
-        
-        if total == 0:
-            logger.info("[Retrieval] No relevant memories found")
-            stats["success"] = True
-            return stats
-        
-        logger.info(f"[Retrieval] Found {total} relevant memories")
-        
-        # 4. Format memories
-        formatted = format_memories_for_context(memories)
-        
-        # 5. Update session_context
-        updated = await update_session_context(agent_id, formatted)
-        stats["context_updated"] = updated
-        stats["success"] = updated
+        # 3. ADR-005: Try smart search with Query Analyzer
+        try:
+            from memory.memory_retriever import MemoryRetriever
+            
+            retriever = MemoryRetriever()
+            results, metadata = retriever.smart_search(
+                query=message,
+                query_vector=embedding,
+                limit=RETRIEVAL_LIMIT
+            )
+            
+            stats["strategy"] = metadata.get("strategy", "pure_semantic")
+            stats["intent"] = metadata.get("intent")
+            stats["memories_found"] = len(results)
+            
+            if results:
+                # Format using new method
+                formatted = retriever.format_for_context(results, max_memories=8)
+                
+                # Update session_context
+                updated = await update_session_context(agent_id, formatted)
+                stats["context_updated"] = updated
+                stats["success"] = updated
+                
+                logger.info(f"[Retrieval] ADR-005: {len(results)} memories, strategy={stats['strategy']}, intent={stats['intent']}")
+            else:
+                stats["success"] = True
+                logger.info("[Retrieval] No relevant memories found")
+            
+        except ImportError:
+            # Fallback to legacy retrieval if new modules not available
+            logger.warning("[Retrieval] ADR-005 modules not available, using legacy search")
+            
+            memories = await search_all_collections(
+                vector=embedding,
+                limit=RETRIEVAL_LIMIT,
+                score_threshold=RETRIEVAL_THRESHOLD
+            )
+            
+            total = sum(len(v) for v in memories.values())
+            stats["memories_found"] = total
+            
+            if total > 0:
+                formatted = format_memories_for_context(memories)
+                updated = await update_session_context(agent_id, formatted)
+                stats["context_updated"] = updated
+                stats["success"] = updated
+            else:
+                stats["success"] = True
         
         # Track timing
         duration = (datetime.now() - start_time).total_seconds() * 1000
         stats["duration_ms"] = round(duration)
         
-        logger.info(f"[Retrieval] Complete in {stats['duration_ms']}ms, {total} memories")
+        logger.info(f"[Retrieval] Complete in {stats['duration_ms']}ms")
         
         return stats
         

@@ -1,14 +1,17 @@
 """
-Memory Retriever Tool for Scarlet
+Memory Retriever Tool for Scarlet - Human-Like Memory System v2.0
 
 This module provides:
-- Letta-compatible tool for memory retrieval
-- Cross-collection semantic search
-- Human-like memory access patterns
+- Query-intent-aware retrieval (ADR-005)
+- Multi-strategy search (temporal, entity, emotional, topic)
+- Multi-factor ranking formula
+- Access tracking and reinforcement
+- Letta-compatible tool interface
 
 Author: ABIOGENESIS Team
-Version: 1.0.0
+Version: 2.0.0
 Date: 2026-02-01
+ADR: ADR-005
 """
 
 import os
@@ -16,10 +19,19 @@ import sys
 import json
 import logging
 from pathlib import Path
-from typing import Optional, Dict, Any, List, Union
+from typing import Optional, Dict, Any, List, Union, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+
+from qdrant_client import QdrantClient
+from qdrant_client.models import (
+    Filter,
+    FieldCondition,
+    MatchValue,
+    MatchAny,
+    Range,
+)
 
 # Add parent directories to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -28,8 +40,17 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 logger = logging.getLogger(__name__)
 
 
+class SearchStrategy(Enum):
+    """Search strategies based on query intent (ADR-005)"""
+    FILTERED_TEMPORAL = "filtered_temporal"     # Filter by date + semantic
+    FILTERED_ENTITY = "filtered_entity"         # Filter by participants + semantic
+    FILTERED_EMOTIONAL = "filtered_emotional"   # Filter by valence + semantic
+    FILTERED_TOPIC = "filtered_topic"           # Filter by topics + semantic
+    PURE_SEMANTIC = "pure_semantic"             # Only semantic (fallback)
+
+
 class RetrievalStrategy(Enum):
-    """Strategies for memory retrieval"""
+    """Legacy strategies (kept for backward compatibility)"""
     SEMANTIC = "semantic"        # Vector similarity search
     TEMPORAL = "temporal"        # Time-based retrieval
     EMOTIONAL = "emotional"      # Emotion-based retrieval
@@ -39,7 +60,7 @@ class RetrievalStrategy(Enum):
 
 @dataclass
 class RetrievalResult:
-    """Result from memory retrieval"""
+    """Result from memory retrieval (enhanced for ADR-005)"""
     memory_type: str
     title: str
     content: str
@@ -48,6 +69,17 @@ class RetrievalResult:
     emotional_tone: Optional[str] = None
     created_at: Optional[str] = None
     tags: List[str] = field(default_factory=list)
+    
+    # ADR-005: Additional ranking factors
+    id: Optional[str] = None
+    collection: Optional[str] = None
+    semantic_score: float = 0.0
+    temporal_relevance: float = 0.0
+    emotional_intensity: float = 0.0
+    access_frequency: float = 0.0
+    recency_bonus: float = 0.0
+    decay_factor: float = 1.0
+    payload: Dict[str, Any] = field(default_factory=dict)
     
     def to_context_string(self) -> str:
         """Format as context string for LLM"""
@@ -71,23 +103,54 @@ class RetrievalResult:
 
 class MemoryRetriever:
     """
-    Memory Retriever for human-like memory access.
+    Memory Retriever for human-like memory access (ADR-005 v2.0).
     
-    Provides cross-collection search capabilities with different
-    retrieval strategies to simulate human memory patterns.
+    Provides:
+    - Query-intent-aware retrieval
+    - Multi-strategy search with Qdrant filters
+    - Multi-factor ranking formula
+    - Access tracking and reinforcement
     """
     
-    def __init__(self, memory_manager=None, embedding_manager=None):
+    # Collection name mapping
+    COLLECTION_MAP = {
+        "episodic": "episodes",
+        "semantic": "concepts", 
+        "procedural": "skills",
+        "skills": "skills",
+        "emotional": "emotions",
+        "emotions": "emotions",
+        "episodes": "episodes",
+        "concepts": "concepts",
+    }
+    
+    # ADR-005 Ranking weights
+    WEIGHT_SEMANTIC = 0.35
+    WEIGHT_TEMPORAL = 0.25
+    WEIGHT_IMPORTANCE = 0.15
+    WEIGHT_EMOTIONAL = 0.10
+    WEIGHT_FREQUENCY = 0.10
+    WEIGHT_RECENCY = 0.05
+    
+    def __init__(self, memory_manager=None, embedding_manager=None, qdrant_client=None):
         """
         Initialize memory retriever.
         
         Args:
             memory_manager: Optional MemoryManager instance
             embedding_manager: Optional EmbeddingManager instance
+            qdrant_client: Optional QdrantClient for direct access
         """
         self._memory_manager = memory_manager
         self._embedding_manager = embedding_manager
+        self._qdrant_client = qdrant_client
+        self._query_analyzer = None
         self._initialized = False
+        
+        # Access tracking config
+        self.enable_access_tracking = True
+        self.importance_boost_per_access = 0.02
+        self.max_importance = 0.95
         
     def _ensure_initialized(self) -> bool:
         """Lazy initialization of managers."""
@@ -104,6 +167,20 @@ class MemoryRetriever:
             if self._embedding_manager is None:
                 from memory.embedding_manager import EmbeddingManager
                 self._embedding_manager = EmbeddingManager()
+            
+            if self._qdrant_client is None:
+                self._qdrant_client = QdrantClient(
+                    host=os.getenv("QDRANT_HOST", "localhost"),
+                    port=int(os.getenv("QDRANT_PORT", "6333")),
+                )
+            
+            # Try to initialize query analyzer (optional)
+            try:
+                from memory.query_analyzer import get_query_analyzer
+                self._query_analyzer = get_query_analyzer()
+                logger.info("[MemoryRetriever] Query Analyzer initialized")
+            except Exception as e:
+                logger.warning(f"[MemoryRetriever] Query Analyzer not available: {e}")
             
             self._initialized = True
             return True
@@ -173,6 +250,335 @@ class MemoryRetriever:
         
         return all_results[:limit * 2]  # Return more results for cross-type queries
     
+    def smart_search(
+        self,
+        query: str,
+        query_vector: Optional[List[float]] = None,
+        known_entities: Optional[List[str]] = None,
+        limit: int = 10,
+    ) -> Tuple[List[RetrievalResult], Dict[str, Any]]:
+        """
+        ADR-005: Intelligent search with query analysis and multi-factor ranking.
+        
+        Args:
+            query: User's query text
+            query_vector: Pre-computed embedding (optional)
+            known_entities: Known entities for better analysis
+            limit: Max results
+            
+        Returns:
+            Tuple of (results, metadata)
+        """
+        import time
+        start_time = time.time()
+        
+        if not self._ensure_initialized():
+            return [], {"error": "Not initialized"}
+        
+        metadata = {
+            "query": query,
+            "strategy": SearchStrategy.PURE_SEMANTIC.value,
+            "collections_searched": [],
+            "total_candidates": 0,
+        }
+        
+        # Step 1: Analyze query (if analyzer available)
+        analysis = None
+        qdrant_filter = None
+        memory_types = ["episodic", "semantic", "procedural", "emotional"]
+        
+        if self._query_analyzer:
+            try:
+                analysis = self._query_analyzer.analyze(query, known_entities)
+                metadata["intent"] = analysis.intent.value
+                metadata["entities"] = analysis.entities
+                metadata["topics"] = analysis.topics
+                
+                # Build filter based on analysis
+                qdrant_filter, strategy = self._build_filter_from_analysis(analysis)
+                metadata["strategy"] = strategy.value
+                
+                # Use analyzed memory types
+                memory_types = [self._map_memory_type(t) for t in analysis.memory_types]
+                
+            except Exception as e:
+                logger.warning(f"[smart_search] Analysis failed: {e}")
+        
+        # Step 2: Get embedding if not provided
+        if query_vector is None:
+            try:
+                semantic_query = analysis.semantic_query if analysis else query
+                embedding_result = self._embedding_manager.generate(semantic_query, dimensions=1024)
+                query_vector = embedding_result.vector
+            except Exception as e:
+                logger.error(f"[smart_search] Embedding failed: {e}")
+                return [], {"error": f"Embedding failed: {e}"}
+        
+        # Step 3: Search each collection with filter
+        all_results = []
+        collections = [self.COLLECTION_MAP.get(t, t) for t in memory_types]
+        collections = list(set(collections))  # Unique
+        metadata["collections_searched"] = collections
+        
+        for collection in collections:
+            try:
+                results = self._search_collection_filtered(
+                    collection=collection,
+                    query_vector=query_vector,
+                    qdrant_filter=qdrant_filter,
+                    limit=limit * 2,
+                )
+                all_results.extend(results)
+            except Exception as e:
+                logger.warning(f"[smart_search] Search failed for {collection}: {e}")
+        
+        metadata["total_candidates"] = len(all_results)
+        
+        # Step 4: Apply multi-factor ranking
+        ranked_results = self._rank_results_adr005(all_results, analysis)
+        
+        # Step 5: Trim to limit
+        final_results = ranked_results[:limit]
+        
+        # Step 6: Update access stats
+        if self.enable_access_tracking and final_results:
+            self._update_access_stats(final_results)
+        
+        elapsed_ms = (time.time() - start_time) * 1000
+        metadata["retrieval_time_ms"] = round(elapsed_ms, 1)
+        
+        return final_results, metadata
+    
+    def _build_filter_from_analysis(self, analysis) -> Tuple[Optional[Filter], SearchStrategy]:
+        """Build Qdrant filter from query analysis."""
+        from .query_analyzer import QueryIntent, TimeType
+        
+        conditions = []
+        strategy = SearchStrategy.PURE_SEMANTIC
+        
+        # Temporal filter
+        if analysis.intent == QueryIntent.TEMPORAL and analysis.time.type != TimeType.NONE:
+            strategy = SearchStrategy.FILTERED_TEMPORAL
+            date_str = analysis.time.to_date_filter()
+            if date_str:
+                conditions.append(
+                    FieldCondition(key="date", match=MatchValue(value=date_str))
+                )
+        
+        # Entity filter
+        if analysis.intent == QueryIntent.ENTITY and analysis.entities:
+            strategy = SearchStrategy.FILTERED_ENTITY
+            conditions.append(
+                FieldCondition(key="participants", match=MatchAny(any=analysis.entities))
+            )
+        
+        # Emotional filter
+        if analysis.intent == QueryIntent.EMOTIONAL:
+            strategy = SearchStrategy.FILTERED_EMOTIONAL
+            if analysis.emotion_filter == "positive":
+                conditions.append(
+                    FieldCondition(key="emotional_valence", range=Range(gt=0.3))
+                )
+            elif analysis.emotion_filter == "negative":
+                conditions.append(
+                    FieldCondition(key="emotional_valence", range=Range(lt=-0.3))
+                )
+        
+        # Topic filter
+        if analysis.intent == QueryIntent.TOPIC and analysis.topics:
+            strategy = SearchStrategy.FILTERED_TOPIC
+            conditions.append(
+                FieldCondition(key="topics", match=MatchAny(any=analysis.topics))
+            )
+        
+        qdrant_filter = Filter(must=conditions) if conditions else None
+        return qdrant_filter, strategy
+    
+    def _map_memory_type(self, mem_type: str) -> str:
+        """Map memory type string to collection name."""
+        return self.COLLECTION_MAP.get(mem_type, mem_type)
+    
+    def _search_collection_filtered(
+        self,
+        collection: str,
+        query_vector: List[float],
+        qdrant_filter: Optional[Filter],
+        limit: int,
+    ) -> List[RetrievalResult]:
+        """Search a collection with optional filter (ADR-005)."""
+        try:
+            results = self._qdrant_client.search(
+                collection_name=collection,
+                query_vector=query_vector,
+                query_filter=qdrant_filter,
+                limit=limit,
+                score_threshold=0.3,
+                with_payload=True,
+            )
+            
+            memory_results = []
+            for hit in results:
+                payload = hit.payload or {}
+                
+                memory_results.append(RetrievalResult(
+                    id=str(hit.id),
+                    collection=collection,
+                    memory_type=collection,
+                    title=payload.get("title", "Untitled"),
+                    content=payload.get("content", "")[:500],
+                    relevance_score=0.0,  # Will be computed
+                    semantic_score=hit.score,
+                    importance=payload.get("importance", 0.5),
+                    emotional_tone=payload.get("primary_emotion") or payload.get("emotional_tone"),
+                    created_at=payload.get("created_at"),
+                    tags=payload.get("tags", []),
+                    decay_factor=payload.get("decay_factor", 1.0),
+                    payload=payload,
+                ))
+            
+            return memory_results
+            
+        except Exception as e:
+            logger.error(f"[_search_collection_filtered] Error in {collection}: {e}")
+            return []
+    
+    def _rank_results_adr005(
+        self,
+        results: List[RetrievalResult],
+        analysis=None,
+    ) -> List[RetrievalResult]:
+        """Apply ADR-005 multi-factor ranking formula."""
+        now = datetime.now()
+        
+        for result in results:
+            payload = result.payload
+            
+            # 1. Semantic similarity
+            semantic_score = result.semantic_score
+            
+            # 2. Temporal relevance
+            temporal_relevance = 0.0
+            if analysis and analysis.time.resolved_start:
+                memory_date_str = payload.get("date")
+                if memory_date_str:
+                    try:
+                        memory_date = datetime.strptime(memory_date_str, "%Y-%m-%d")
+                        days_diff = abs((analysis.time.resolved_start - memory_date).days)
+                        temporal_relevance = max(0, 1.0 - (days_diff / 7))
+                    except:
+                        pass
+            result.temporal_relevance = temporal_relevance
+            
+            # 3. Importance
+            importance = payload.get("importance", 0.5)
+            result.importance = importance
+            
+            # 4. Emotional intensity
+            valence = payload.get("emotional_valence", 0.0)
+            arousal = payload.get("emotional_arousal", 0.5)
+            emotional_intensity = abs(valence) * arousal if valence else 0.0
+            result.emotional_intensity = emotional_intensity
+            
+            # 5. Access frequency (normalized)
+            access_count = payload.get("access_count", 0)
+            access_frequency = min(1.0, access_count / 10)
+            result.access_frequency = access_frequency
+            
+            # 6. Recency bonus
+            created_at_str = payload.get("created_at")
+            recency_bonus = 0.0
+            if created_at_str:
+                try:
+                    if "T" in created_at_str:
+                        created_at = datetime.fromisoformat(created_at_str.replace("Z", ""))
+                    else:
+                        created_at = datetime.strptime(created_at_str, "%Y-%m-%d")
+                    days_old = (now - created_at).days
+                    recency_bonus = max(0, 1.0 - (days_old / 30))
+                except:
+                    pass
+            result.recency_bonus = recency_bonus
+            
+            # 7. Decay factor
+            decay_factor = payload.get("decay_factor", 1.0)
+            result.decay_factor = decay_factor
+            
+            # ADR-005 Formula
+            final_score = (
+                semantic_score * self.WEIGHT_SEMANTIC +
+                temporal_relevance * self.WEIGHT_TEMPORAL +
+                importance * self.WEIGHT_IMPORTANCE +
+                emotional_intensity * self.WEIGHT_EMOTIONAL +
+                access_frequency * self.WEIGHT_FREQUENCY +
+                recency_bonus * self.WEIGHT_RECENCY
+            ) * decay_factor
+            
+            result.relevance_score = round(final_score, 4)
+        
+        # Sort by final score
+        results.sort(key=lambda x: x.relevance_score, reverse=True)
+        return results
+    
+    def _update_access_stats(self, results: List[RetrievalResult]) -> None:
+        """Update access count and importance for retrieved memories (ADR-005)."""
+        now = datetime.now().isoformat()
+        
+        for result in results:
+            if not result.id or not result.collection:
+                continue
+            try:
+                current_access = result.payload.get("access_count", 0)
+                current_importance = result.payload.get("importance", 0.5)
+                
+                new_access = current_access + 1
+                new_importance = min(
+                    self.max_importance,
+                    current_importance + self.importance_boost_per_access
+                )
+                
+                self._qdrant_client.set_payload(
+                    collection_name=result.collection,
+                    payload={
+                        "access_count": new_access,
+                        "last_accessed": now,
+                        "importance": round(new_importance, 3),
+                    },
+                    points=[result.id],
+                )
+                
+                logger.debug(f"[AccessTracking] Updated {result.id}: count={new_access}")
+                
+            except Exception as e:
+                logger.warning(f"[AccessTracking] Failed for {result.id}: {e}")
+    
+    def format_for_context(self, results: List[RetrievalResult], max_memories: int = 5) -> str:
+        """Format results for session_context injection (ADR-005)."""
+        if not results:
+            return ""
+        
+        lines = ["[RICORDI EMERGENTI]", ""]
+        
+        for i, mem in enumerate(results[:max_memories], 1):
+            collection_label = {
+                "episodes": "📅 Episodio",
+                "concepts": "💡 Concetto",
+                "skills": "🔧 Procedura",
+                "emotions": "💜 Emozione",
+            }.get(mem.collection, "📝 Memoria")
+            
+            lines.append(f"{i}. {collection_label}: {mem.title}")
+            content_preview = mem.content[:150] + "..." if len(mem.content) > 150 else mem.content
+            lines.append(f"   {content_preview}")
+            
+            if mem.temporal_relevance > 0.5:
+                lines.append(f"   ⏰ Molto recente")
+            if mem.emotional_intensity > 0.5:
+                lines.append(f"   💫 Emotivamente significativo")
+            
+            lines.append("")
+        
+        return "\n".join(lines)
+
     def _search_collection(
         self,
         query: str,

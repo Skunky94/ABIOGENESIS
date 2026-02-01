@@ -2,7 +2,67 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.3.5
+**Version**: 0.3.6
+
+---
+
+## 2026-02-01 - Human-Like Memory v2.0 Implementation (ADR-005)
+
+### MEMORY-009: Implementazione Query Analyzer e Multi-Strategy Search
+
+**Descrizione**: Implementazione completa delle Fasi 1-4 di ADR-005 per il sistema di memoria human-like.
+
+**Componenti Implementati**:
+
+1. **Query Analyzer** (`src/memory/query_analyzer.py`)
+   - Modello: `qwen2.5:1.5b` su Ollama (locale, zero cloud)
+   - Intent detection: temporal, entity, emotional, topic, procedural, general
+   - Time resolution: risoluzione automatica "ieri", "settimana scorsa", etc.
+   - Entity extraction: estrazione automatica nomi/entità
+   - Latenza: ~520ms (accettabile per locale)
+   - Accuracy: 85.7% su test set
+
+2. **Qdrant Payload Indexes** (`scripts/create_qdrant_indexes.py`)
+   - 17 indici per collection (date, participants, topics, emotional_valence, etc.)
+   - Supporto filtri temporali, entità, emozioni, topic
+   - Tutti i collections: episodes, concepts, skills, emotions
+
+3. **Multi-Strategy Retriever** (`src/memory/memory_retriever.py` v2.0)
+   - SearchStrategy: FILTERED_TEMPORAL, FILTERED_ENTITY, FILTERED_EMOTIONAL, FILTERED_TOPIC, PURE_SEMANTIC
+   - ADR-005 Ranking Formula con 6 fattori:
+     - semantic_similarity * 0.35
+     - temporal_relevance * 0.25
+     - importance * 0.15
+     - emotional_intensity * 0.10
+     - access_frequency * 0.10
+     - recency_bonus * 0.05
+   - Access Tracking: incremento automatico access_count e importance
+   - `smart_search()`: nuovo metodo principale con Query Analyzer
+
+4. **Integrazione Webhook** (`src/sleep_webhook.py`)
+   - `perform_automatic_retrieval()` ora usa `smart_search()`
+   - Fallback a legacy retrieval se moduli non disponibili
+   - Stats estese: strategy, intent
+
+**Test Results**:
+- Query Analyzer: 6/7 intenti corretti (85.7%)
+- JSON parsing: 7/7 (100%)
+- Import e inizializzazione: OK
+
+**Files Modificati**:
+- `scarlet/src/memory/query_analyzer.py` (nuovo)
+- `scarlet/src/memory/memory_retriever.py` (aggiornato v2.0)
+- `scarlet/src/sleep_webhook.py` (integrazione ADR-005)
+- `scarlet/scripts/create_qdrant_indexes.py` (nuovo)
+- `scarlet/tests/test_query_analyzer_latency.py` (nuovo)
+
+**Modelli Scaricati**:
+- `qwen2.5:1.5b` (986 MB) per Query Analyzer
+- `qwen2.5:0.5b` (397 MB) testato ma scartato (14% accuracy)
+
+**Compatibilità**: Non-Breaking (backward compatible con legacy retrieval)
+
+**Tags**: #memory #adr-005 #query-analyzer #multi-strategy #retrieval #implementation
 
 ---
 
