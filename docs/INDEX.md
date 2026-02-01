@@ -1,8 +1,9 @@
 # ABIOGENESIS - Documentation Index
 
-**Version**: 1.2.0  
+**Version**: 1.3.0  
 **Updated**: 2026-02-01  
 **Maintainer**: IDE Agent (GitHub Copilot / Claude)
+**Project Version**: 0.4.2
 
 ---
 
@@ -44,23 +45,29 @@
 
 ### Technical Specifications (/docs/specifications/)
 
+> **Nota**: Le SPEC sono documenti di ANALISI e RICERCA. Non contengono task operativi.
+> Una SPEC validata porta alla creazione di un ADR.
+
 | SPEC | Titolo | Stato |
 |------|--------|-------|
-| [SPEC-001](specifications/spec-001-memory-system-architecture.md) | Memory System Architecture | 🔄 Da allineare con ADR-005 |
-| [SPEC-002](specifications/spec-002-human-to-scarlet-mapping.md) | Mappatura Cognitiva Umano-Scarlet | ✅ Reference |
-| [SPEC-003](specifications/spec-003-architectural-review.md) | Architectural Review | ⚠️ Da verificare |
+| [SPEC-001](specifications/spec-001-memory-system-architecture.md) | Memory System Architecture | ✅ Accepted → ADR-005 |
+| [SPEC-002](specifications/spec-002-human-to-scarlet-mapping.md) | Mappatura Cognitiva Umano-Scarlet | 📚 Analisi di Ricerca |
+| [SPEC-003](specifications/spec-003-architectural-review.md) | Architectural Review | 📚 Analisi Esplorativa |
 | [spec-template](specifications/spec-template.md) | Template per nuove SPEC | 📄 Template |
 
 ### Procedures (/docs/procedures/)
 
-| PROC | Titolo | Scopo |
-|------|--------|-------|
-| [PROC-001](procedures/proc-001-system-prompt-update.md) | System Prompt Update | Aggiornare prompt in modo sicuro |
-| [PROC-002](procedures/proc-002-agent-config-modification.md) | Agent Config Modification | Modificare configurazione agente |
-| [PROC-003](procedures/proc-003-agent-recreation.md) | Agent Recreation (Letta) | Eliminare e ricreare agente |
-| [PROC-004](procedures/proc-004-database-backup.md) | Database Backup | Backup PostgreSQL |
-| [PROC-005](procedures/proc-005-docker-services-update.md) | Docker Services Update | Aggiornare servizi Docker |
-| [proc-template](procedures/proc-template.md) | Template per nuove PROC | 📄 Template |
+> **Nota**: Le PROC sono GUIDE OPERATIVE per l'IDE Agent. Seguire i passi ESATTAMENTE.
+> Ogni passo include: Cosa fare, Comando, Output atteso, Se fallisce.
+
+| PROC | Titolo | Scopo | Ver |
+|------|--------|-------|-----|
+| [PROC-001](procedures/proc-001-system-prompt-update.md) | System Prompt Update | Aggiornare prompt in modo sicuro | v1.1.0 |
+| [PROC-002](procedures/proc-002-agent-config-modification.md) | Agent Config Modification | Modificare configurazione agente | v1.1.0 |
+| [PROC-003](procedures/proc-003-agent-recreation.md) | Agent Recreation (Letta) | Eliminare e ricreare agente | v1.1.0 |
+| [PROC-004](procedures/proc-004-database-backup.md) | Database Backup | Backup PostgreSQL | v1.1.0 |
+| [PROC-005](procedures/proc-005-docker-services-update.md) | Docker Services Update | Aggiornare servizi Docker | v1.1.0 |
+| [proc-template](procedures/proc-template.md) | Template per nuove PROC | 📄 Template | - |
 
 > ⚠️ **IMPORTANTE**: Prima di eseguire operazioni documentate nelle PROC, consultare SEMPRE la procedura corrispondente per garantire consistenza.
 

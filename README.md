@@ -2,7 +2,7 @@
 
 > *"Where digital becomes alive"*
 
-**Version**: 0.3.7  
+**Version**: 0.4.2  
 **Status**: Active Development  
 **Updated**: 2026-02-01
 
@@ -26,7 +26,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        SCARLET v0.3.7                       │
+│                        SCARLET v0.4.2                       │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐  ┌──────────────────┐  ┌───────────────┐  │
 │  │   CORTEX    │  │  MEMORY SYSTEM   │  │    TOOLS      │  │
@@ -64,7 +64,7 @@
 
 ## 📊 Current Status
 
-### ✅ Completed (v0.3.7)
+### ✅ Completed (v0.4.2)
 
 - **Primary Agent** - Scarlet with 5 memory blocks
 - **Custom Sleep-Time** - Webhook-based consolidation
@@ -72,6 +72,7 @@
 - **Query Analyzer** - Intent-based search strategies
 - **Decay System** - Ebbinghaus forgetting curve
 - **Conscious Tool** - `remember()` for active recall
+- **Documentation Framework** - ADR/SPEC/PROC con format operativo
 
 ### 🔄 Planned
 

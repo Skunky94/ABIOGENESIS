@@ -2,7 +2,45 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.4.1
+**Version**: 0.4.2
+
+---
+
+## 2026-02-01 - Documentation Consistency Fix
+
+### DOCS-005: Allineamento Versioni e Regola Consistency
+
+**Descrizione**: Correzione discrepanza versioni tra documenti e aggiunta regola critica per mantenere coerenza.
+
+**Problema Risolto**:
+- README.md era fermo a v0.3.7 mentre CONTEXT.md era a v0.4.1
+- INDEX.md aveva stati SPEC obsoleti
+
+**Modifiche**:
+
+1. **README.md** - Aggiornato a v0.4.1
+   - Header version corretta
+   - Diagramma ASCII con versione corretta
+   - Sezione "Completed" include Documentation Framework
+
+2. **docs/INDEX.md** - Aggiornato a v1.3.0
+   - Aggiunto Project Version: 0.4.1
+   - Stati SPEC corretti (SPEC-001 → ADR-005, altri → Analisi)
+   - Aggiunta colonna versione per PROC (tutte v1.1.0)
+   - Aggiunte note esplicative su SPEC e PROC
+
+3. **copilot-instructions.md** - Regola consistency aggiunta
+   - After Every Task ora include verifica README.md e INDEX.md
+   - Aggiunta nota critica su allineamento versioni
+
+**Files Modificati**:
+- `README.md`
+- `docs/INDEX.md`
+- `.github/copilot-instructions.md`
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #docs #versioning #consistency
 
 ---
 
