@@ -23,7 +23,7 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 | Layer | Nome | Status | Progress |
 |-------|------|--------|----------|
 | L0 | Foundation | ✅ COMPLETE | 100% |
-| L1 | Continuous Existence | ⏳ PENDING | 0% |
+| L1 | Continuous Existence | 🔄 IN PROGRESS | 50% |
 | L2 | Self-Model | ⏳ PENDING | 0% |
 | L3 | Reflection | ⏳ PENDING | 0% |
 | L4 | Agency | ⏳ PENDING | 0% |
@@ -71,67 +71,63 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 
 ## ⏳ LAYER 1: CONTINUOUS EXISTENCE
 
-**Status**: ⏳ PENDING  
+**Status**: 🔄 IN PROGRESS (SPEC completa, ADR pending)  
 **Dipendenze**: Layer 0 ✅  
 **Obiettivo**: Scarlet esiste e opera senza bisogno di trigger umani.
 
 ### 1.1 Autonomous Loop
-**SPEC**: TBD | **ADR**: TBD
+**SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: ADR-006 (pending)
 
 > Come Scarlet vive continuamente senza input esterni?
 
-**Domande da esplorare**:
-- Ciclo principale che gira 24/7 senza bloccarsi
-- Stati interni: IDLE, THINKING, ACTING, SLEEPING, DREAMING
-- Transizioni automatiche tra stati (quando e perché?)
-- Nessun bisogno di "sveglia" esterna per agire
-- Gestione risorse (CPU, memoria, API calls) - non consuma infinitamente
-- Graceful degradation quando risorse scarse
-- Heartbeat e liveness check
+**Decisioni SPEC-004**:
+- ✅ Servizio dedicato `autonomy-runtime` (container separato)
+- ✅ Configurazione centralizzata `scarlet/config/runtime.yaml`
+- ✅ State machine: IDLE → THINKING → ACTING → SLEEPING → DREAMING
+- ✅ Loop infinito by design (continuità esistenziale)
+- ✅ Working Set per persistenza tra tick
+- ✅ Environment Snapshot ad ogni invocazione
 
-**Componenti attesi**:
-- `autonomous_loop.py` - Main loop orchestrator
-- State machine per transizioni
-- Resource monitor
-- Scheduler per attività periodiche
+**Componenti previsti**:
+- `scarlet/src/runtime/loop.py` - Main loop orchestrator
+- `scarlet/src/runtime/config.py` - Configuration loader
+- `scarlet/src/runtime/state.py` - State machine
+- `scarlet/config/runtime.yaml` - Config file
 
 ### 1.2 Performance Monitor
-**SPEC**: TBD | **ADR**: TBD
+**SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: ADR-006 (pending)
 
 > Come Scarlet sa se sta funzionando correttamente?
 
-**Domande da esplorare**:
-- Quali metriche definiscono "funzionamento corretto"?
-- Latenza risposte, error rate, memory usage
-- Self-diagnostics periodici (cosa controlla?)
-- Threshold per stati anomali (quando è "troppo"?)
-- Logging strutturato per debugging futuro
-- Alerting interno (notifica se stessa, non umani)
-- Trend analysis (sto peggiorando nel tempo?)
+**Decisioni SPEC-004**:
+- ✅ Runaway score multi-fattore (progress, density, repetition, errors)
+- ✅ Progress markers per misurare avanzamento
+- ✅ Metriche day-1 definite (ticks, budget, health, progress)
+- ✅ MiniMax budget tracking con rolling window (5000/5h)
+- ✅ Throttling non distruttivo (attesa, non errore)
 
-**Componenti attesi**:
-- `performance_monitor.py` - Metrics collection
-- Health check endpoints
-- Internal dashboard/state
+**Componenti previsti**:
+- `scarlet/src/runtime/budget.py` - Budget tracker (Redis)
+- `scarlet/src/runtime/metrics.py` - Metrics collection
+- `scarlet/src/runtime/runaway.py` - Runaway detection
 
 ### 1.3 Error Detection & Resilience
-**SPEC**: TBD | **ADR**: TBD
+**SPEC**: [SPEC-004](specifications/spec-004-continuous-existence.md) ✅ | **ADR**: ADR-006 (pending)
 
 > Come Scarlet rileva e gestisce i propri errori?
 
-**Domande da esplorare**:
-- Categorizzazione errori (recuperabile vs critico vs ignorabile)
-- Auto-restart di componenti falliti
-- Circuit breaker per evitare loop infiniti di retry
-- Journaling errori per analisi futura (in memoria?)
-- Isolation: un errore in un componente non crasha tutto
-- Fallback behaviors (se X non funziona, faccio Y)
-- Error budget (quanti errori sono accettabili?)
+**Decisioni SPEC-004**:
+- ✅ Circuit breaker con configurazione (threshold, timeout, half-open)
+- ✅ Backoff esponenziale con jitter
+- ✅ Runaway detection → emissione **Learning Event**
+- ✅ Learning Event come entry point per futuro Learning Agent (L3.2)
+- ✅ Mitigazioni senza spegnere: throttle, replan, park, sleep/dream
+- ✅ Error journal in Qdrant collection dedicata
 
-**Componenti attesi**:
-- `error_handler.py` - Centralized error management
-- Circuit breaker implementation
-- Error journal in Qdrant
+**Componenti previsti**:
+- `scarlet/src/runtime/circuit_breaker.py` - Circuit breaker
+- `scarlet/src/runtime/learning_events.py` - Learning Event emission
+- Qdrant collections: `learning_events`, `error_journal`
 
 ---
 
@@ -232,6 +228,7 @@ ROADMAP item → SPEC-XXX (analisi) → ADR-XXX (decisione) → Implementation �
 
 **Domande da esplorare**:
 - Extraction di lezioni da fallimenti specifici
+- Ingest di **Learning Event** da L1 (runaway/error patterns) come dataset di apprendimento
 - Pattern matching: "questo errore l'ho già visto?"
 - Generalizzazione: da caso specifico a regola generale
 - Spaced repetition per consolidamento lezioni

@@ -2,14 +2,14 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.13
+**Version**: 1.0.14
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.4.7 - Production Roadmap
+### Version: 0.4.8 - L1 SPEC Complete
 
 | Phase | Status | Progress |
 |-------|--------|----------|
@@ -21,6 +21,7 @@
 | **Docker Persistence** | ✅ FIXED | `LETTA_PG_URI` + pgvector configurati |
 | **Changelog System** | ✅ COMPLETE | Nuovo formato CNG (13 files) |
 | **Production Roadmap** | ✅ COMPLETE | 8 Layer verso v1.0 (docs/ROADMAP.md) |
+| **L1 SPEC** | ✅ COMPLETE | SPEC-004 ready for ADR-006 |
 | Goal Management | ⏳ PENDING | Self-generated goals (Roadmap L4) |
 | Emotional Encoding | ✅ INTEGRATED | PAD model in schema v2.0 |
 | Procedural Memory | ⏳ PENDING | Skill tracking (Roadmap L6) |
@@ -32,7 +33,7 @@
 | Layer | Focus | Status |
 |-------|-------|--------|
 | L0 | Foundation | ✅ COMPLETE |
-| L1 | Continuous Existence | ⏳ Next Priority |
+| L1 | Continuous Existence | 🔄 SPEC Done, ADR Pending |
 | L2 | Self-Model | Planned |
 | L3 | Reflection | Planned |
 | L4 | Agency | Planned |
@@ -42,6 +43,18 @@
 | L8 | Emotional | Parallel from L3 |
 
 **Full details**: [docs/ROADMAP.md](docs/ROADMAP.md)
+
+### L1 Key Decisions (SPEC-004)
+
+| Decisione | Scelta |
+|-----------|--------|
+| Architettura | Servizio dedicato `autonomy-runtime` |
+| Configurazione | File YAML unico `scarlet/config/runtime.yaml` |
+| Storage hot | Redis (Working Set, Budget, State) |
+| Storage cold | Qdrant (Learning Events, Error Journal) |
+| Budget MiniMax | 5000 req/5h rolling window, throttle |
+| Runaway | Score multi-fattore, configurable |
+| Learning | Learning Event → futuro Learning Agent (L3.2) |
 
 ### Agent IDs (ACTIVE)
 
@@ -64,14 +77,14 @@ Sleep:      agent-862e8be2-488a-4213-9778-19b372b5a04e
 | `abiogenesis-qdrant` | ✅ Running | 4 collections |
 | `abiogenesis-sleep-webhook` | ✅ Running | v2.2 |
 
-### Documentation System (v0.4.7)
+### Documentation System (v0.4.8)
 
 | Type | Location | Count |
 |------|----------|-------|
 | **ADR** | `docs/architecture/` | 5 + template |
-| **SPEC** | `docs/specifications/` | 3 + template |
+| **SPEC** | `docs/specifications/` | 4 + template |
 | **PROC** | `docs/procedures/` | 6 + template |
-| **CNG** | `docs/changelogs/` | 13 + template |
+| **CNG** | `docs/changelogs/` | 14 + template |
 | **ROADMAP** | `docs/ROADMAP.md` | 8 Layer roadmap |
 
 > Nuovo sistema CNG: CHANGELOG.md snello con link a file CNG dettagliati.
