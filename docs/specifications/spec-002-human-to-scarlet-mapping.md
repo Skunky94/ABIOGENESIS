@@ -1,8 +1,14 @@
-# Mappatura Cognitiva: Umano <-> Scarlet
+# SPEC-002: Mappatura Cognitiva Umano-Scarlet
 
-**Version**: 1.0.0
-**Date**: 2026-01-31
-**Project**: ABIOGENESIS - Scarlet Sentient AI
+**Status**: Active  
+**Version**: 1.0.0  
+**Date**: 2026-01-31  
+**Author**: ABIOGENESIS Team  
+**Focus**: Analisi comparativa mente umana vs Scarlet
+
+> **Nota**: Questo documento è un'ANALISI DI RICERCA che mappa le capacità cognitive umane
+> verso possibili implementazioni in Scarlet. Serve come riferimento per decisioni architetturali future.
+> NON contiene task operativi.
 
 ---
 

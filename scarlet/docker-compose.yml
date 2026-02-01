@@ -37,9 +37,7 @@ services:
       - ./data:/app/data:rw
       - ./prompts:/app/prompts:ro
       - ./.env:/app/.env:ro
-      # Mount dei file fixati per MiniMax
-      - ./letta-source/letta/schemas/providers/minimax.py:/app/letta/schemas/providers/minimax.py:ro
-      - ./letta-source/letta/llm_api/openai_client.py:/app/letta/llm_api/openai_client.py:ro
+      # NOTE: mount MiniMax fix rimossi - file non presenti nel fork locale
     depends_on:
       postgres:
         condition: service_healthy
@@ -112,10 +110,11 @@ services:
     networks:
       - abiogenesis-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      test: ["CMD-SHELL", "ollama list || exit 1"]
       interval: 30s
-      timeout: 10s
+      timeout: 30s
       retries: 5
+      start_period: 60s
     restart: unless-stopped
 
   # ====================================================================

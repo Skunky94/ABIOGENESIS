@@ -1,10 +1,14 @@
-# Design Document: Memory System Architecture
+# SPEC-001: Memory System Architecture
 
+**Status**: Accepted → ADR-005  
 **Version**: 1.0.0  
 **Date**: 2026-01-31  
-**Status**: Draft  
 **Author**: ABIOGENESIS Team  
 **Focus**: Memory Management System for Scarlet
+
+> **Nota**: Questa SPEC è stata validata e ha portato alla creazione di [ADR-005](../architecture/adr-005-human-like-memory-system.md).
+> Le sezioni "Implementation Roadmap" e "Success Criteria" sono state mantenute per riferimento storico
+> ma NON devono essere usate come task list. Fare riferimento a ADR-005 per l'implementazione.
 
 ---
 
@@ -14,10 +18,10 @@
 2. [Human Memory Analysis](#human-memory-analysis)
 3. [Letta Memory Assessment](#letta-memory-assessment)
 4. [Proposed Architecture](#proposed-architecture)
-5. [Implementation Roadmap](#implementation-roadmap)
+5. [Implementation Roadmap](#implementation-roadmap) *(storico)*
 6. [External Tools Evaluation](#external-tools-evaluation)
 7. [Risk Analysis](#risk-analysis)
-8. [Success Criteria](#success-criteria)
+8. [Success Criteria](#success-criteria) *(storico)*
 
 ---
 

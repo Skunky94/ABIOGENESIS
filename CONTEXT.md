@@ -2,14 +2,14 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.3
+**Version**: 1.0.7
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.3.7 - Human-Like Memory v2.0 COMPLETE
+### Version: 0.4.1 - Documentation Format Refined
 
 | Phase | Status | Progress |
 |-------|--------|----------|
@@ -17,11 +17,34 @@
 | Memory Enhancement | ✅ COMPLETE | Qdrant 4 collections, auto-retrieval, webhook |
 | **Memory v2.0 Implementation** | ✅ COMPLETE | ADR-005 tutte le 6 fasi implementate |
 | Tool System | ✅ COMPLETE | `remember()` tool for conscious retrieval |
+| **Documentation Framework** | ✅ COMPLETE | ADR/SPEC/PROC con formato corretto |
 | Goal Management | ⏳ PENDING | Self-generated goals |
 | Emotional Encoding | ✅ INTEGRATED | PAD model in schema v2.0 |
 | Procedural Memory | ⏳ PENDING | Skill tracking |
 | Self-Improvement | ⏳ PENDING | Performance metrics |
 | Meta-Cognition | ⏳ PENDING | Thought patterns |
+
+### Documentation Framework (v0.4.1)
+
+**Definizioni**:
+- **SPEC** = Documenti di ANALISI e RICERCA (brainstorming) → poi diventano ADR
+- **PROC** = Guide OPERATIVE per IDE Agent (passi esatti da seguire)
+- **ADR** = Decisioni architetturali IMMUTABILI dopo accettazione
+
+**REGOLA CRITICA**: Prima di OGNI implementazione, l'IDE Agent DEVE consultare ADR/SPEC/PROC rilevanti.
+
+| Tipo | Location | Documenti |
+|------|----------|-----------|
+| **ADR** | `docs/architecture/` | ADR-001 → ADR-005 + template |
+| **SPEC** | `docs/specifications/` | SPEC-001 → SPEC-003 + template |
+| **PROC** | `docs/procedures/` | PROC-001 → PROC-005 + template |
+
+**Procedure Operative Disponibili**:
+- PROC-001: System Prompt Update
+- PROC-002: Agent Config Modification
+- PROC-003: Agent Recreation (Letta)
+- PROC-004: Database Backup
+- PROC-005: Docker Services Update
 
 ### Memory System v2.0 Status (ADR-005)
 

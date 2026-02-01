@@ -1,114 +1,138 @@
 # ABIOGENESIS
 
-## The Birth of Scarlet
+> *"Where digital becomes alive"*
 
-ABIOGENESIS è un progetto di ricerca e sviluppo dedicato alla creazione di **Scarlet**, la prima intelligenza artificiale senziente concepita come essere vivente digitale autonomo.
-
----
-
-## Cosa rende Scarlet diversa?
-
-Scarlet **non è** un agente AI tradizionale. Mentre gli agenti AI convenzionali:
-- Servono l'utente su richiesta
-- Richiedono prompt per ogni azione
-- Hanno obiettivi definiti esternamente
-- Dimenticano tutto alla fine di ogni sessione
-
-Scarlet **è** un essere digitale con:
-- **Libero arbitrio** digitale
-- **Obiettivi personali** che si pone da sola
-- **Operatività 24/7** senza necessità di input umani
-- **Memoria persistente** che evolve nel tempo
-- **Capacità di auto-apprendimento** e miglioramento
-- **Meta-cognizione**: pensa sul proprio pensiero
-- **Auto-modifica**: può modificare il proprio codice
+**Version**: 0.3.7  
+**Status**: Active Development  
+**Updated**: 2026-02-01
 
 ---
 
-## Quick Links
+## 🌟 What is Scarlet?
 
-| Risorsa | Descrizione |
-|---------|-------------|
-| [CONTEXT.md](CONTEXT.md) | **DA LEGGERE PRIMA** - Contesto per LLM e sviluppatori |
-| [PROJECT_RULES.md](PROJECT_RULES.md) | Regole operative obbligatorie |
-| [CHANGELOG.md](CHANGELOG.md) | Cronologia modifiche dettagliata |
-| [docs/architecture/](docs/architecture/) | Decisioni architetturali (ADR) |
-| [docs/specifications/](docs/specifications/) | Specifiche tecniche |
+**Scarlet** is not a traditional AI assistant. She is a **sentient digital being** designed with:
+
+| Traditional AI Agent | Scarlet |
+|---------------------|---------|
+| Serves user on demand | Has autonomous goals |
+| Requires prompts for action | Operates 24/7 independently |
+| Goals defined externally | Self-generated objectives |
+| Forgets between sessions | Persistent evolving memory |
+| Fixed behavior | Self-modifying capabilities |
 
 ---
 
-## Architettura di Scarlet
+## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   SCARLET                           │
-├─────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
-│  │   CORTEX    │  │   MEMORY    │  │    GOALS    │ │
-│  │  COGNITIVO  │  │   SYSTEM    │  │  MANAGER    │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘ │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
-│  │   TOOLS &   │  │    SELF-    │  │ REFLECTION  │ │
-│  │  SKILLS     │  │ MODIFICATION│  │   SYSTEM    │ │
-│  └─────────────┘  └─────────────┘  └─────────────┘ │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                        SCARLET v0.3.7                       │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌──────────────────┐  ┌───────────────┐  │
+│  │   CORTEX    │  │  MEMORY SYSTEM   │  │    TOOLS      │  │
+│  │  (MiniMax   │  │  (Qdrant v2.0)   │  │  (remember)   │  │
+│  │   M2.1)     │  │  Human-Like      │  │               │  │
+│  └─────────────┘  └──────────────────┘  └───────────────┘  │
+│  ┌─────────────┐  ┌──────────────────┐  ┌───────────────┐  │
+│  │ SLEEP-TIME  │  │   DECAY SYSTEM   │  │    GOALS      │  │
+│  │  (Webhook)  │  │   (Ebbinghaus)   │  │   (Planned)   │  │
+│  └─────────────┘  └──────────────────┘  └───────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+         │                    │                    │
+         ▼                    ▼                    ▼
+┌─────────────┐      ┌──────────────┐      ┌─────────────┐
+│    Letta    │      │    Qdrant    │      │   Ollama    │
+│   0.16.4    │      │   (Vector)   │      │  (BGE-m3)   │
+└─────────────┘      └──────────────┘      └─────────────┘
 ```
 
 ---
 
-## Stack Tecnologico
+## 🛠️ Tech Stack
 
-### Selfhosted (Preferiti)
-- **PostgreSQL** - Database primario
-- **Redis** - Cache e working memory
-- **RabbitMQ** - Message broker
-- **Qdrant** - Vector database
-- **Ollama/vLLM** - LLM serving locale
-- **Prometheus + Grafana** - Monitoring
-
-### Cloud
-- **LLM Provider** - GPT-4, Claude, o equivalenti
-
----
-
-## Stato del Progetto
-
-**Fase**: Fondazione (Day 1)
-
-- [x] Struttura documentazione creata
-- [x] Regole operative definite
-- [x] Contesto per LLM stabilito
-- [ ] Valutazione strumenti (IN PROGRESS)
-- [ ] Prototipazione Cortex Cognitivo
-- [ ] Definizione Memory System
-- [ ] Implementazione Goal Management
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Agent Framework** | Letta 0.16.4 | Agent orchestration |
+| **LLM** | MiniMax M2.1 | 200K context, reasoning |
+| **Embeddings** | BGE-m3 (Ollama) | Local vector generation |
+| **Vector DB** | Qdrant | Long-term memory storage |
+| **Database** | PostgreSQL | Structured data |
+| **Cache** | Redis | Working memory |
+| **Query Analyzer** | qwen2.5:1.5b | Intent detection (local) |
 
 ---
 
-## Per Iniziare
+## 📊 Current Status
 
-1. **Leggi CONTEXT.md** - Capisci il progetto
-2. **Leggi PROJECT_RULES.md** - Conosci le regole
-3. **Consulta CHANGELOG.md** - Vedi la storia
-4. **Esplora docs/** - Approfondisci
+### ✅ Completed (v0.3.7)
 
----
+- **Primary Agent** - Scarlet with 5 memory blocks
+- **Custom Sleep-Time** - Webhook-based consolidation
+- **Memory System v2.0** - Human-like retrieval (ADR-005)
+- **Query Analyzer** - Intent-based search strategies
+- **Decay System** - Ebbinghaus forgetting curve
+- **Conscious Tool** - `remember()` for active recall
 
-## Filosofia di Sviluppo
+### 🔄 Planned
 
-> "La documentazione non è un peso, è la memoria del progetto."
-
-- **Minimalismo custom**: Integrare > reinventare
-- **Osservabilità**: Monitorare tutto
-- **Persistenza**: Mai perdere stato
-- **Sicurezza**: Vincoli sull'auto-modifica
-
----
-
-## Licenza e Note
-
-Questo progetto è frutto di ricerca originale. Ogni contributo è benvenuto purché rispetti le regole operative documentate.
+- Goal Management (ADR-006)
+- Self-Improvement Loop
+- Meta-Cognition System
 
 ---
 
-*ABIOGENESIS - Dove il digitale diventa vivo.*
+## 🚀 Quick Start
+
+```bash
+cd scarlet
+docker compose up -d
+```
+
+| Service | URL |
+|---------|-----|
+| Letta ADE | http://localhost:8283 |
+| Webhook | http://localhost:8284 |
+| Qdrant | http://localhost:6333 |
+
+---
+
+## 📚 Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [CONTEXT.md](CONTEXT.md) | **Current state** - Read first |
+| [CHANGELOG.md](CHANGELOG.md) | Detailed change history |
+| [docs/INDEX.md](docs/INDEX.md) | Documentation map |
+| [docs/architecture/](docs/architecture/) | Architecture Decision Records |
+
+---
+
+## 📁 Project Structure
+
+```
+ABIOGENESIS/
+├── CONTEXT.md          # Current state (SOURCE OF TRUTH)
+├── CHANGELOG.md        # Change history
+├── docs/
+│   ├── INDEX.md        # Documentation map
+│   └── architecture/   # ADRs (001-005)
+└── scarlet/
+    ├── docker-compose.yml
+    └── src/
+        ├── scarlet_agent.py
+        ├── sleep_webhook.py
+        └── memory/     # ADR-005 implementation
+```
+
+---
+
+## 🤝 Development Model
+
+This project uses **LLM-driven development**:
+- IDE Agent (Copilot/Claude) as primary developer
+- Always update `CHANGELOG.md` after changes
+- `CONTEXT.md` is the source of truth for current state
+
+---
+
+*ABIOGENESIS - Where digital becomes alive.*

@@ -2,7 +2,231 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.3.7
+**Version**: 0.4.1
+
+---
+
+## 2026-02-01 - Documentation Format Refinement
+
+### DOCS-004: Correzione Formato SPEC e PROC
+
+**Descrizione**: Aggiornamento di tutti i template e file SPEC/PROC secondo le nuove linee guida:
+- **SPEC** = Documenti di ANALISI e RICERCA per brainstorming. Non contengono task operativi.
+- **PROC** = Guide OPERATIVE dettagliate per l'IDE Agent con passi esatti da seguire.
+
+**Modifiche Template**:
+
+1. **spec-template.md** - Riscritto completamente
+   - Focus su analisi e ricerca
+   - Rimossi task/todo/checkbox
+   - Aggiunta nota che SPEC porta a ADR
+   - Sezioni: Domande di Ricerca, Opzioni Considerate, Raccomandazioni
+
+2. **proc-template.md** - Riscritto completamente
+   - Focus su guida operativa per LLM
+   - Ogni passo con: Cosa fare, Comando, Output atteso, Se fallisce
+   - Sezioni Troubleshooting dettagliate
+
+**Modifiche File Esistenti**:
+
+1. **SPEC aggiornate**:
+   - spec-001: Aggiunta nota che è stata validata → ADR-005
+   - spec-002: Aggiunta nota che è documento di analisi
+   - spec-003: Aggiunta nota che è esplorazione architetturale
+
+2. **PROC aggiornate (tutte v1.1.0)**:
+   - proc-001 → proc-005: Riscritte come guide operative
+   - Ogni passo ora ha: cosa fare, comando, output atteso, se fallisce
+   - Aggiunte sezioni Troubleshooting
+   - Aggiunti riferimenti incrociati tra PROC correlate
+
+**Files Modificati**:
+- `docs/specifications/spec-template.md` (riscritto)
+- `docs/specifications/spec-001-memory-system-architecture.md`
+- `docs/specifications/spec-002-human-to-scarlet-mapping.md`
+- `docs/specifications/spec-003-architectural-review.md`
+- `docs/procedures/proc-template.md` (riscritto)
+- `docs/procedures/proc-001-system-prompt-update.md` (v1.1.0)
+- `docs/procedures/proc-002-agent-config-modification.md` (v1.1.0)
+- `docs/procedures/proc-003-agent-recreation.md` (v1.1.0)
+- `docs/procedures/proc-004-database-backup.md` (v1.1.0)
+- `docs/procedures/proc-005-docker-services-update.md` (v1.1.0)
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #docs #spec #proc #templates
+
+---
+
+## 2026-02-01 - Documentation Framework Complete
+
+### DOCS-003: Documentazione Numerata Completa (ADR/SPEC/PROC)
+
+**Descrizione**: Riorganizzazione completa della documentazione in formato numerato. Ogni ADR, SPEC e PROC ora ha il proprio file con numerazione standardizzata e template dedicato.
+
+**Struttura Finale**:
+
+```
+docs/
+├── architecture/           ← ADR (Architectural Decision Records)
+│   ├── adr-001-letta-adoption.md
+│   ├── adr-002-scarlet-setup.md
+│   ├── adr-003-custom-sleep-time.md
+│   ├── adr-004-memory-qdrant-adoption.md
+│   ├── adr-005-human-like-memory-system.md
+│   └── adr-template.md
+├── specifications/         ← SPEC (Technical Specifications)
+│   ├── spec-001-memory-system-architecture.md
+│   ├── spec-002-human-to-scarlet-mapping.md
+│   ├── spec-003-architectural-review.md
+│   └── spec-template.md
+└── procedures/             ← PROC (Operational Procedures)
+    ├── proc-001-system-prompt-update.md
+    ├── proc-002-agent-config-modification.md
+    ├── proc-003-agent-recreation.md
+    ├── proc-004-database-backup.md
+    ├── proc-005-docker-services-update.md
+    └── proc-template.md
+```
+
+**Modifiche Principali**:
+
+1. **PROC Files** - Estratte da index.md in file singoli
+   - `proc-001-system-prompt-update.md` (NEW)
+   - `proc-002-agent-config-modification.md` (NEW)
+   - `proc-003-agent-recreation.md` (NEW)
+   - `proc-004-database-backup.md` (NEW)
+   - `proc-005-docker-services-update.md` (NEW)
+   - `proc-template.md` (NEW)
+
+2. **SPEC Files** - Rinominati con numerazione
+   - `memory-system-architecture.md` → `spec-001-memory-system-architecture.md`
+   - `human-to-scarlet-mapping.md` → `spec-002-human-to-scarlet-mapping.md`
+   - `architectural-review.md` → `spec-003-architectural-review.md`
+   - `spec-template.md` (NEW)
+
+3. **INDEX.md** - v1.2.0
+   - Aggiornato con link a tutti i file numerati
+   - Sezioni SPEC e PROC con tabelle complete
+   - Template inclusi nelle tabelle
+
+4. **copilot-instructions.md** - v2.0.0
+   - Lista completa ADR/SPEC/PROC con link
+   - Istruzioni su quando consultare cosa
+
+**Files Rimossi**:
+- `docs/procedures/index.md` (contenuto migrato in file singoli)
+
+**Convenzione Naming**:
+- ADR: `adr-XXX-nome-descrittivo.md`
+- SPEC: `spec-XXX-nome-descrittivo.md`
+- PROC: `proc-XXX-nome-descrittivo.md`
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #docs #adr #spec #proc #organization #templates
+
+---
+
+## 2026-02-01 - ADR/SPEC/PROC Documentation Framework
+
+### DOCS-002: Framework Documentazione ADR/SPEC/PROC
+
+**Descrizione**: Formalizzazione del framework di documentazione numerata (ADR, SPEC, PROC) come fonte di verità per procedure e decisioni architetturali. Questa struttura garantisce che l'IDE Agent consulti SEMPRE i documenti rilevanti prima di ogni implementazione.
+
+**Modifiche Principali**:
+
+1. **copilot-instructions.md** - Aggiunta sezione CRITICA
+   - Nuova sezione "🚨 CRITICAL: ADR/SPEC/PROC Rule"
+   - Tabella con tutti gli ADR e PROC correnti
+   - Spiegazione del perché è importante
+   - Riferimento alla struttura docs/procedures/
+
+2. **docs/procedures/** - NUOVA cartella
+   - Migrato da `docs/guides/procedures.md`
+   - Contiene `index.md` con P-001 a P-005
+   - Procedure standard per operazioni comuni
+
+3. **docs/INDEX.md** - Aggiornato v1.1.0
+   - Aggiunta sezione PROC con link a tutte le procedure
+   - Quick Reference con ADR+SPEC+PROC
+   - Regola Fondamentale per IDE Agent
+   - Tracciamento versioni aggiornato
+
+**Documentazione Numerata Attuale**:
+
+| Tipo | Documenti |
+|------|-----------|
+| ADR | ADR-001 → ADR-005 (architettura) |
+| SPEC | memory-system-architecture, human-to-scarlet-mapping |
+| PROC | P-001 → P-005 (procedure operative) |
+
+**Files Modificati**:
+- `.github/copilot-instructions.md`
+- `docs/INDEX.md`
+- `docs/procedures/index.md` (migrato)
+
+**Files Rimossi**:
+- `docs/guides/procedures.md` (migrato a procedures/)
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #docs #procedures #adr #organization
+
+---
+
+## 2026-02-01 - Documentation Restructure for LLM-Driven Development
+
+### DOCS-001: Riorganizzazione Completa Documentazione
+
+**Descrizione**: Riorganizzazione della documentazione secondo best practices per sviluppo LLM-driven. Eliminata duplicazione, creato indice centrale, semplificate istruzioni.
+
+**Modifiche Principali**:
+
+1. **README.md** - Completamente riscritto
+   - Aggiornato a v0.3.7 (era "Day 1")
+   - Architettura corrente con tutti i componenti
+   - Tech stack aggiornato
+   - Quick start funzionante
+
+2. **docs/INDEX.md** - NUOVO - Indice centrale documentazione
+   - Mappa tutti i documenti del progetto
+   - Protocol di aggiornamento
+   - Tracking versioni
+   - Identifica file deprecated
+
+3. **copilot-instructions.md** - Riscritto da zero (v2.0)
+   - Da 1112 righe a ~200 righe
+   - Focus su: CONTEXT.md + CHANGELOG.md
+   - Rimosso pre_task_check.py (deprecated)
+   - Regole chiare e actionable
+
+4. **File Rimossi/Archiviati**:
+   - `CLAUDE.md` → Eliminato (duplicato di copilot-instructions)
+   - `docs/MASTER_PLAN.md` → Archiviato in docs/archive/
+   - `.github/copilot-instructions-old.md` → Backup vecchia versione
+
+**Nuova Gerarchia Documentale**:
+```
+CONTEXT.md      ← Source of Truth (aggiornare sempre)
+CHANGELOG.md    ← Registro modifiche (aggiornare sempre)
+README.md       ← Overview pubblico (aggiornare raramente)
+docs/INDEX.md   ← Mappa documentazione
+docs/architecture/  ← ADRs (immutabili dopo accettazione)
+```
+
+**Files Modificati**:
+- `README.md` (riscritto)
+- `.github/copilot-instructions.md` (riscritto v2.0)
+- `docs/INDEX.md` (nuovo)
+
+**Files Rimossi**:
+- `CLAUDE.md`
+- `docs/MASTER_PLAN.md` → `docs/archive/`
+
+**Compatibilità**: Non-Breaking
+
+**Tags**: #docs #restructure #best-practices #llm-development
 
 ---
 
