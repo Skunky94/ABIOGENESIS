@@ -2,49 +2,70 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 1.0.0
+**Version**: 1.0.2
 **Updated**: 2026-02-01
 
 ---
 
 ## Current Project State
 
-### Version: 0.2.0 - Memory Enhancement Phase (Step 4 COMPLETED)
+### Version: 0.3.5 - Human-Like Memory Architecture Designed
 
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Foundation (v0.2.0) | ✅ COMPLETE | Primary agent, custom sleep-time, 5 memory blocks |
-| Memory Enhancement | 🔄 IN PROGRESS | Steps 1-4 complete, Qdrant + Letta integration |
-| Tool System | ⏳ PENDING | Core tools for memory access |
+| Memory Enhancement | ✅ COMPLETE | Qdrant 4 collections, auto-retrieval, webhook |
+| **Memory v2.0 Architecture** | 📐 DESIGNED | ADR-005 completo, pronto per implementazione |
+| Tool System | 🔄 IN PROGRESS | Conscious retrieval tool needed |
 | Goal Management | ⏳ PENDING | Self-generated goals |
-| Emotional Encoding | ⏳ PENDING | Emotional states |
+| Emotional Encoding | ⏳ PENDING | PAD model defined in ADR-005 |
 | Procedural Memory | ⏳ PENDING | Skill tracking |
 | Self-Improvement | ⏳ PENDING | Performance metrics |
 | Meta-Cognition | ⏳ PENDING | Thought patterns |
 
 ### Memory System Status
 
-**Qdrant Infrastructure**: ✅ COMPLETE (Step 1)
-- 4 collections: episodes (1024d), concepts (1024d), skills (1024d), emotions (512d)
+**Qdrant Infrastructure**: ✅ COMPLETE
+- 4 collections: episodes, concepts, skills, emotions (ALL 1024-dim)
 - INT8 quantization for RAM efficiency
-- ~35MB/year storage for years of conversations
+- Points: episodes=2, concepts=8, skills=0, emotions=0
 
-**Extended Memory Blocks**: ✅ COMPLETE (Step 2)
-- 9 total memory blocks in Letta (5 base + 4 extended)
-- Episodic, Semantic, Procedural, Emotional memory types
-- EmbeddingManager with BGE-m3 integration
+**Automatic Retrieval**: ✅ COMPLETE (v0.3.2)
+- Webhook retrieves memories on every user message (~350-400ms)
+- Updates session_context with [RICORDI EMERGENTI]
+- "Priming effect" - memories from turn N available at turn N+1
 
-**ScarletAgent Integration**: ✅ COMPLETE (Step 3)
-- MemoryManager initialization during agent creation
-- API methods: store_episodic_memory, store_knowledge, store_skill
-- Retrieval methods: retrieve_memories, get_memory_stats
+**Data Quality**: ✅ VERIFIED (v0.3.3)
+- Collections cleaned (20 garbage points removed)
+- No duplicates, no test data, no errors as memories
 
-**Sleep-Time Integration**: ✅ COMPLETE (Step 4)
-- Automatic memory storage during consolidation
-- Key events → episodic memory
-- Knowledge updates → semantic memory
-- Skill updates → procedural memory
-- Emotional patterns → emotional memory
+### Human-Like Memory v2.0 (ADR-005) - READY FOR IMPLEMENTATION
+
+**Architettura Progettata**:
+- **Query Analyzer**: LLM locale (qwen2.5:1.5b su Ollama) per capire intento query
+- **Multi-Strategy Search**: Ricerca filtrata per tempo/entità/emozioni/topic
+- **Schema Arricchito**: 30+ campi payload (PAD emotions, temporal, relations)
+- **Ranking Formula**: 6 fattori con pesi (semantic, temporal, importance, emotional, frequency, recency)
+- **Decay System**: Curva Ebbinghaus con protezione emotiva
+- **Access Tracking**: Reinforcement per memorie accedute frequentemente
+
+**Implementation Roadmap** (22h stimate):
+1. Fase 1: Infrastruttura (download qwen2.5:1.5b, test, indici Qdrant)
+2. Fase 2: Query Analyzer (modulo + prompt + parsing)
+3. Fase 3: Schema Dati (MemoryBlock, enrichment, migration)
+4. Fase 4: Multi-Strategy Search (filters, ranking, tracking)
+5. Fase 5: Decay System (background job)
+6. Fase 6: Tool Conscio (Scarlet search tool)
+
+**Riferimento**: [ADR-005](docs/architecture/adr-005-human-like-memory-system.md)
+
+### NEXT STEPS (Priorità Aggiornate)
+
+1. **Download qwen2.5:1.5b** - Aggiungere a docker-compose.yml per Ollama
+2. **Test Query Analyzer** - Verificare latenza e qualità parsing intenti
+3. **Creare Indici Qdrant** - Per filtri efficienti su date, participants, topics
+4. **Implementare Query Analyzer** - Modulo `src/memory/query_analyzer.py`
+5. **Implementare Multi-Strategy Search** - Modulo `src/memory/memory_retriever.py`
 
 ---
 

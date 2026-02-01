@@ -2,7 +2,46 @@
 
 **Project**: ABIOGENESIS - Sentient Digital AI Development
 **Entity**: Scarlet
-**Version**: 0.3.4
+**Version**: 0.3.5
+
+---
+
+## 2026-02-01 - Human-Like Memory System v2.0 Architecture
+
+### ADR-005: Human-Like Memory System Architecture
+
+**Descrizione**: Creato ADR completo che documenta l'architettura del nuovo sistema di memoria human-like per Scarlet. Questo ADR servirà come base per l'implementazione.
+
+**Decisioni Chiave**:
+1. **Query Analyzer**: LLM locale (`qwen2.5:1.5b` su Ollama) - NO cloud
+2. **Multi-Strategy Search**: Ricerca basata su intento (temporal, entity, emotional, topic, procedural)
+3. **Schema Arricchito**: 30+ campi per payload completo (PAD emotions, temporal, relations)
+4. **Access Tracking**: Reinforcement per memorie accedute frequentemente
+5. **Decay System**: Curva di Ebbinghaus con protezione emotiva
+6. **Doppio Canale**: Automatico (ogni messaggio) + Conscio (tool Scarlet)
+
+**Contenuti ADR**:
+- Analisi gap sistema attuale
+- Schema dati completo per Qdrant
+- Query Analyzer specification
+- Multi-Strategy Search algorithm
+- Ranking formula (6 fattori con pesi)
+- Implementation roadmap (22h stimate, 6 fasi)
+- Success criteria
+
+**Files Creati**:
+- `docs/architecture/adr-005-human-like-memory-system.md`
+
+**Prossimi Passi**:
+1. Download qwen2.5:1.5b su Ollama
+2. Creare indici Qdrant per filtri
+3. Implementare Query Analyzer
+4. Implementare Multi-Strategy Search
+5. Aggiornare schema payload memorie
+
+**Compatibilità**: Non-Breaking (solo documentazione)
+
+**Tags**: #memory #architecture #adr #query-analyzer #retrieval #emotions
 
 ---
 
